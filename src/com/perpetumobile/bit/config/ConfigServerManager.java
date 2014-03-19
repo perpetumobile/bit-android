@@ -21,6 +21,7 @@ public class ConfigServerManager {
 
 	static private Logger logger = new Logger(ConfigServerManager.class);
 	
+	final static public String CONFIG_SERVER_ENABLE_KEY = "ConfigServerManager.Enable";
 	final static public String CONFIG_SERVER_URLS_KEY = "ConfigServerManager.URLs";
 	final static public String CONFIG_SERVER_HTTP_REQUEST_CLASS_KEY = "ConfigServerManager.HttpRequest.Class";
 	final static public String CONFIG_SERVER_MANAGER_INTENT_ACTION_SUFFIX = "ConfigServerManager.INTENT_ACTION_SUFFIX";
@@ -41,7 +42,7 @@ public class ConfigServerManager {
 	protected void requestServerConfig() {
 		synchronized(lock) {
 			// don't request config from server if previous request pending
-			if(!isRequestPending) {
+			if(!isRequestPending && Config.getInstance().getBooleanProperty(CONFIG_SERVER_ENABLE_KEY, false)) {
 				String urls = Config.getInstance().getProperty(CONFIG_SERVER_URLS_KEY, null);
 				if(!Util.nullOrEmptyString(urls)) {
 					docList = new ArrayList<HttpResponseDocument>();
