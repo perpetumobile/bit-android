@@ -124,21 +124,33 @@ public class SAXParserManager extends BitBroadcastManager {
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
 	 */
 	public XMLRecord parseSync(HttpRequest httpRequest, String configNamePrefix, String rootElementName) {
-		return parseSync(httpRequest, configNamePrefix, rootElementName, null);
+		return parseSync(httpRequest, configNamePrefix, rootElementName, null, null);
 	}
 	
 	/**
-	 * Parse is executed in a Bit Service Thread.
+	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
 	 */
-	public XMLRecord parseSync(HttpRequest httpRequest, String configNamePrefix, String rootElementName, StatementLogger stmtLogger) {
+	public XMLRecord parseSync(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
+		return parseSync(httpRequest, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
+	}
+	
+	/**
+	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
+	 * Blocking mode: Current thread is waiting for operation to complete and return result.
+	 */
+	public XMLRecord parseSync(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		SAXParserTask task = new SAXParserTask();
 		task.setHttpRequest(httpRequest);
 		task.setConfigNamePrefix(configNamePrefix);
 		task.setRootElementName(rootElementName);
 		task.setStmtLogger(stmtLogger);
 		try {
-			ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
 			task.isDone();
 		} catch (Exception e) {
 			logger.error("SAXParserManager.parse exception", e);
@@ -154,17 +166,28 @@ public class SAXParserManager extends BitBroadcastManager {
 	 * configNamePrefix is used as a intentActionSuffix.
 	 */
 	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName) {
-		parse(httpRequest, configNamePrefix, rootElementName, null);
+		parse(httpRequest, configNamePrefix, rootElementName, null, null);
 	}
 	
 	/**
-	 * Parse is executed in a Bit Service Thread.
+	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
 	 * Broadcast will be sent to broadcast receiver after operation is completed.
 	 * Broadcast receiver needs to be registered using registerReceiver method.
 	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName, StatementLogger stmtLogger) {
+	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
+		parse(httpRequest, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
+	}
+	
+	/**
+	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
+	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
+	 * Broadcast will be sent to broadcast receiver after operation is completed.
+	 * Broadcast receiver needs to be registered using registerReceiver method.
+	 * configNamePrefix is used as a intentActionSuffix.
+	 */
+	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		// registerReceiver must not be called multiple times
 		// client needs to explicitly register using registerReceiver method
 		// registerReceiver(broadcastReceiver, configNamePrefix);
@@ -175,7 +198,11 @@ public class SAXParserManager extends BitBroadcastManager {
 		task.setStmtLogger(stmtLogger);
 		task.setIntentActionSuffix(configNamePrefix);
 		try {
-			ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
 		} catch (Exception e) {
 			logger.error("SAXParserManager.parse exception", e);
 		}

@@ -117,31 +117,27 @@ public class HttpManager extends BitBroadcastManager {
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
 	 */
 	public HttpResponseDocument executeSync(HttpRequest httpRequest) {
+		return executeSync(httpRequest, null);
+	}
+	
+	/**
+	 * Operation is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
+	 * Blocking mode: Current thread is waiting for operation to complete and return result.
+	 */
+	public HttpResponseDocument executeSync(HttpRequest httpRequest, String threadPoolManagerConfigName) {
 		HttpTask task = new HttpTask();
 		task.setHttpRequest(httpRequest);
 		try {
-			ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
 			task.isDone();
 		} catch (Exception e) {
 			logger.error("HttpManager.execute exception", e);
 		}
 		return task.getResult();
-	}
-	
-	/**
-	 * GET operation is executed in a Bit Service Thread.
-	 * Blocking mode: Current thread is waiting for operation to complete and return result.
-	 */
-	public HttpResponseDocument getSync(String url) {
-		return executeSync(new HttpRequest(url));
-	}
-	
-	/**
-	 * POST operation is executed in a Bit Service Thread.
-	 * Blocking mode: Current thread is waiting for operation to complete and return result.
-	 */
-	public HttpResponseDocument postSync(String url, String content) {
-		return executeSync(new HttpRequest(HttpMethod.POST, url, content));
 	}
 	
 	/**
@@ -151,6 +147,16 @@ public class HttpManager extends BitBroadcastManager {
 	 * Broadcast receiver needs to be registered using registerReceiver method.
 	 */
 	public void execute(HttpRequest httpRequest, String intentActionSuffix) {
+		execute(httpRequest, intentActionSuffix, null);
+	}
+	
+	/**
+	 * Operation is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
+	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
+	 * Broadcast will be sent to broadcast receiver after operation is completed.
+	 * Broadcast receiver needs to be registered using registerReceiver method.
+	 */
+	public void execute(HttpRequest httpRequest, String intentActionSuffix, String threadPoolManagerConfigName) {
 		// registerReceiver must not be called multiple times
 		// client needs to explicitly register using registerReceiver method
 		// registerReceiver(broadcastReceiver, httpRequest.getUrl());
@@ -162,29 +168,13 @@ public class HttpManager extends BitBroadcastManager {
 			task.setIntentActionSuffix(httpRequest.getUrl());
 		}
 		try {
-			ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);	
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}	
 		} catch (Exception e) {
 			logger.error("HttpManager.execute exception", e);
 		}
-	}
-	
-	/**
-	 * GET operation is executed in a Bit Service Thread.
-	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 */
-	public void get(String url, String intentActionSuffix) {
-		execute(new HttpRequest(url), intentActionSuffix);
-	}
-	
-	/**
-	 * POST operation is executed in a Bit Service Thread.
-	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 */
-	public void post(String url, String content, String intentActionSuffix) {
-		execute(new HttpRequest(HttpMethod.POST, url, content), intentActionSuffix);
 	}
 }
