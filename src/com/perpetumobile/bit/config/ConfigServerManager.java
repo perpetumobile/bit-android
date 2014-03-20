@@ -21,12 +21,14 @@ public class ConfigServerManager {
 
 	static private Logger logger = new Logger(ConfigServerManager.class);
 	
-	final static public String CONFIG_SERVER_ENABLE_KEY = "ConfigServerManager.Enable";
-	final static public String CONFIG_SERVER_URLS_KEY = "ConfigServerManager.URLs";
-	final static public String CONFIG_SERVER_HTTP_REQUEST_CLASS_KEY = "ConfigServerManager.HttpRequest.Class";
+	final static public String CONFIG_SERVER_MANAGER_THREAD_POOL_NAME = "ConfigService";
+	
+	final static public String CONFIG_SERVER_MANAGER_ENABLE_KEY = "ConfigServerManager.Enable";
+	final static public String CONFIG_SERVER_MANAGER_URLS_KEY = "ConfigServerManager.URLs";
+	final static public String CONFIG_SERVER_MANAGER_HTTP_REQUEST_CLASS_KEY = "ConfigServerManager.HttpRequest.Class";
 	final static public String CONFIG_SERVER_MANAGER_INTENT_ACTION_SUFFIX = "ConfigServerManager.INTENT_ACTION_SUFFIX";
 
-	final static public String CONFIG_SERVER_TIMER_CANCEL_KEY = "ConfigServerManager.Timer.Cancel";
+	final static public String CONFIG_SERVER_MANAGER_TIMER_CANCEL_KEY = "ConfigServerManager.Timer.Cancel";
 	
 	private String[] requestList = null;
 	private ArrayList<HttpResponseDocument> docList = null;
@@ -40,32 +42,41 @@ public class ConfigServerManager {
 	
 	@SuppressWarnings("unchecked")
 	protected void requestServerConfig() {
+		boolean doRequest = false;
+		
 		synchronized(lock) {
 			// don't request config from server if previous request pending
-			if(!isRequestPending && Config.getInstance().getBooleanProperty(CONFIG_SERVER_ENABLE_KEY, false)) {
-				String urls = Config.getInstance().getProperty(CONFIG_SERVER_URLS_KEY, null);
+			// don't hold the lock to queue up the requests
+			// if request is already pending release the lock and skip the request
+			if(!isRequestPending && Config.getInstance().getBooleanProperty(CONFIG_SERVER_MANAGER_ENABLE_KEY, false)) {
+				String urls = Config.getInstance().getProperty(CONFIG_SERVER_MANAGER_URLS_KEY, null);
 				if(!Util.nullOrEmptyString(urls)) {
+					// member variables are managed in synchronized section
 					docList = new ArrayList<HttpResponseDocument>();
 					requestList = urls.split(",");
-					String httpRequestClassName = Config.getInstance().getProperty(CONFIG_SERVER_HTTP_REQUEST_CLASS_KEY, null);
-					for(String url : requestList) {
-						HttpRequest httpRequest = null;
-						if(!Util.nullOrEmptyString(httpRequestClassName)) {
-							try {
-								Class<? extends HttpRequest> httpRequestClass = (Class<? extends HttpRequest>)Class.forName(httpRequestClassName);
-								httpRequest = httpRequestClass.newInstance();
-							} catch (Exception e) {
-								logger.error("ConfigServerManager.requestServerConfig cannot instantiate " + httpRequestClassName);
-								httpRequest = new HttpRequest();
-							}
-						} else {
-							httpRequest = new HttpRequest();
-						}
-						httpRequest.setUrl(url);
-						HttpManager.getInstance().execute(httpRequest, CONFIG_SERVER_MANAGER_INTENT_ACTION_SUFFIX);
-					}
 					isRequestPending = true;
+					doRequest = true;
 				}
+			}
+		}
+		
+		if(doRequest) {
+			String httpRequestClassName = Config.getInstance().getProperty(CONFIG_SERVER_MANAGER_HTTP_REQUEST_CLASS_KEY, null);
+			for(String url : requestList) {
+				HttpRequest httpRequest = null;
+				if(!Util.nullOrEmptyString(httpRequestClassName)) {
+					try {
+						Class<? extends HttpRequest> httpRequestClass = (Class<? extends HttpRequest>)Class.forName(httpRequestClassName);
+						httpRequest = httpRequestClass.newInstance();
+					} catch (Exception e) {
+						logger.error("ConfigServerManager.requestServerConfig cannot instantiate " + httpRequestClassName);
+						httpRequest = new HttpRequest();
+					}
+				} else {
+					httpRequest = new HttpRequest();
+				}
+				httpRequest.setUrl(url);
+				HttpManager.getInstance().execute(httpRequest, CONFIG_SERVER_MANAGER_INTENT_ACTION_SUFFIX, CONFIG_SERVER_MANAGER_THREAD_POOL_NAME);
 			}
 		}
 	}
@@ -75,13 +86,15 @@ public class ConfigServerManager {
 		public void onHttpManagerBroadcastReceive(Context context, Intent intent, String intentActionSuffix, HttpResponseDocument result) {
 			if(intentActionSuffix != null && intentActionSuffix.equals(CONFIG_SERVER_MANAGER_INTENT_ACTION_SUFFIX)) {
 				synchronized(lock) {
-					docList.add(result);
-					if(docList.size() == requestList.length) {
-						if(writeConfig(context)) {
-							Config.getInstance().reset(Config.getInstance().getBooleanProperty(CONFIG_SERVER_TIMER_CANCEL_KEY, false));
+					if(isRequestPending) {
+						docList.add(result);
+						if(docList.size() == requestList.length) {
+							if(writeConfig(context)) {
+								Config.getInstance().reset(Config.getInstance().getBooleanProperty(CONFIG_SERVER_MANAGER_TIMER_CANCEL_KEY, false));
+							}
+							isRequestPending = false;
 						}
-						isRequestPending = false;
-					}	
+					}
 				}
 			}
 		}
@@ -117,8 +130,7 @@ public class ConfigServerManager {
 					out.write(doc.getPageSource().getBytes());
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("ConfigServerManager.writeConfig exception.", e);
 				}
 			}
 		}
