@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.CookieSyncManager;
 
 public class BitActivity extends Activity {
 
@@ -62,6 +63,7 @@ public class BitActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		DataSingleton.getInstance().setAssetManager(getAssets());
 		DataSingleton.getInstance().setAppContext(getApplicationContext());
+		CookieSyncManager.createInstance(getApplicationContext());
 		setContentView(layoutId);
 		overridePendingTransition(android.R.anim.fade_in , android.R.anim.fade_out);
 	}

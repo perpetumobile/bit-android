@@ -7,6 +7,7 @@ import com.perpetumobile.bit.util.Util;
 import android.net.Uri;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -67,6 +68,7 @@ public class BitWebViewClient extends WebViewClient {
 			progressBar.setVisibility(View.GONE);
 		}
 		webView.getActivity().setTitle(view.getTitle());
+		CookieSyncManager.getInstance().sync();
 		super.onPageFinished(view, url);
 	}
 }
