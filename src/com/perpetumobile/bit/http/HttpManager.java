@@ -9,6 +9,8 @@ import java.net.CookieHandler;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.webkit.CookieSyncManager;
+
 import com.perpetumobile.bit.android.BitBroadcastManager;
 import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Logger;
@@ -57,6 +59,9 @@ public class HttpManager extends BitBroadcastManager {
 		result.setPageSource(buf.toString());
 		
 		in.close();
+		
+		// sync cookies
+		CookieSyncManager.getInstance().sync();
 	}
 
 	protected HttpResponseDocument getImpl(HttpRequest httpRequest) {
