@@ -70,11 +70,11 @@ public class JSONParserManager extends BitBroadcastManager {
 		}
 	}
 	
-	public JSONRecord parseImpl(Reader in, String configName) {
+	public JSONRecord parseImpl(Reader in, String configName) 
+	throws Exception {
 		JSONParser parser = null;
 		JSONRecordHandler handler = null;
-		JSONRecord result = null;  
-			
+		JSONRecord result = null;  	
 		try {
 			parser = getJSONParser();
 			handler = new JSONRecordHandler(configName, parser, in);
@@ -82,12 +82,11 @@ public class JSONParserManager extends BitBroadcastManager {
 			result = handler.getJSONRecord();
 		} catch (Exception e) {
 			invalidateJSONParser(parser);
-			logger.error("JSONParserManager.parseImpl exception", e);
 			parser = null;
+			throw e;
 		} finally {
 			returnJSONParser(parser);
 		}
-		
 		return result;
 	}
 	
