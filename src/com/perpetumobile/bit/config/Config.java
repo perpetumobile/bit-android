@@ -20,6 +20,8 @@ final public class Config {
 	
 	private ConfigProperties properties = null;
 	
+	private ArrayList<ConfigSubscriber> subscriberList = new ArrayList<ConfigSubscriber>();
+	
 	private Config() {
 		reset(false);
 		
@@ -63,6 +65,8 @@ final public class Config {
 		if(cancelTimer) {
 			TimerManager.getInstance().cancel("Config.Reset");
 		}
+		
+		publish();
 	}
 	
 	/**
@@ -70,6 +74,16 @@ final public class Config {
 	 */
 	protected void requestServerConfig() {
 		ConfigServerManager.getInstance().requestServerConfig();
+	}
+	
+	public void subscribe(ConfigSubscriber subscriber) {
+		subscriberList.add(subscriber);		
+	}
+	
+	protected void publish() {
+		for(ConfigSubscriber subscriber : subscriberList) {
+			subscriber.configReset();
+		}
 	}
 	
 	final private String getPropertyImpl(String key) {
