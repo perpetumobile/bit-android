@@ -1,11 +1,12 @@
 package com.perpetumobile.bit.android;
 
+import com.perpetumobile.bit.android.fragments.WebViewFragment;
 import com.perpetumobile.bit.android.handlers.DrawerActivityHandler;
 import com.perpetumobile.bit.android.handlers.SearchViewActivityHandler;
-import com.perpetumobile.bit.android.handlers.WebViewActivityHandler;
 import com.perpetumobile.bit.config.Config;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -24,10 +25,10 @@ public class BitActivity extends Activity {
 	
 	protected DrawerActivityHandler drawer = null;
 	protected SearchViewActivityHandler searchView = null;
-	protected WebViewActivityHandler webView = null;
+	protected WebViewFragment webViewFragment = null;
 	
 	public boolean isSearchableActivityStartEnabled() {
-		return webView != null && Config.getInstance().getBooleanProperty(SEARCHABLE_ACTIVITY_START_ENABLED_CONFIG_KEY, SEARCHABLE_ACTIVITY_START_ENABLED_DEFAULT);
+		return webViewFragment != null && Config.getInstance().getBooleanProperty(SEARCHABLE_ACTIVITY_START_ENABLED_CONFIG_KEY, SEARCHABLE_ACTIVITY_START_ENABLED_DEFAULT);
 	}
 	
 	protected void setDrawer(Bundle savedInstanceState, DrawerActivityHandler drawerActivityHandler, 
@@ -54,9 +55,9 @@ public class BitActivity extends Activity {
 		}
 	}
 	
-	protected void setWebView(Bundle savedInstanceState, WebViewActivityHandler webViewActivityHandler, int webViewId, int progressBarId) {
-		webView = webViewActivityHandler;
-		if(webView != null) webView.onCreate(savedInstanceState, webViewId, progressBarId);
+	protected void setWebViewFragment(Bundle savedInstanceState, int webViewFragmentId) {
+		FragmentManager fragmentManager = getFragmentManager();
+		webViewFragment = (WebViewFragment)fragmentManager.findFragmentById(webViewFragmentId);
 	}
 
 	protected void onCreate(Bundle savedInstanceState, int layoutId) {
@@ -92,20 +93,20 @@ public class BitActivity extends Activity {
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		if(webView != null) webView.restoreState(savedInstanceState);
+		if(webViewFragment != null) webViewFragment.restoreState(savedInstanceState);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if(webView != null) webView.saveState(outState);
+		if(webViewFragment != null) webViewFragment.saveState(outState);
 	}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// Check if the key event was the Back button and if there's history
-		if ((keyCode == KeyEvent.KEYCODE_BACK) && webView != null && webView.canGoBack()) {
-			webView.goBack();
+		if ((keyCode == KeyEvent.KEYCODE_BACK) && webViewFragment != null && webViewFragment.canGoBack()) {
+			webViewFragment.goBack();
 			return true;
 		}
 		// If it wasn't the Back key or there's no web page history, bubble up to the default
@@ -136,11 +137,11 @@ public class BitActivity extends Activity {
 	}
 
 	public void loadUrl(String url) {
-		if(webView != null) webView.loadUrl(url);
+		if(webViewFragment != null) webViewFragment.loadUrl(url);
 	}
 
 	public void reload() {
-		if(webView != null)	webView.reload();
+		if(webViewFragment != null)	webViewFragment.reload();
 	}
 	
 	public void onWebViewEvent(String url) {

@@ -1,30 +1,25 @@
 package com.perpetumobile.bit.android.clients;
 
-import com.perpetumobile.bit.android.handlers.WebViewActivityHandler;
+import com.perpetumobile.bit.android.fragments.WebViewFragment;
 
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.widget.ProgressBar;
 
 public class BitWebChromeClient extends WebChromeClient {
 
-	protected WebViewActivityHandler webView = null;
-	protected ProgressBar progressBar = null;
+	protected WebViewFragment webViewFragment = null;
 
-	public BitWebChromeClient(WebViewActivityHandler webView, ProgressBar progressBar) {
-		this.webView = webView;
-		this.progressBar = progressBar;
+	public BitWebChromeClient(WebViewFragment webViewFragment) {
+		this.webViewFragment = webViewFragment;
 	}
 
 	public String getConfigName() {
-		return webView.getConfigName();
+		return webViewFragment.getConfigName();
 	}
 	
 	@Override
 	public void onProgressChanged(WebView view, int progress) {
-		if(progressBar != null) {
-			progressBar.setProgress(progress);
-		}
+		webViewFragment.setProgress(progress);
 		super.onProgressChanged(view, progress);
 	}
 }

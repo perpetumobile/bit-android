@@ -1,16 +1,14 @@
 package com.perpetumobile.bit.android.clients;
 
-import com.perpetumobile.bit.android.handlers.WebViewActivityHandler;
+import com.perpetumobile.bit.android.fragments.WebViewFragment;
 import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.util.Util;
 
 import android.net.Uri;
 import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 
 public class BitWebViewClient extends WebViewClient {
 	static final public String CONFIG_NAME = "Default";
@@ -18,16 +16,14 @@ public class BitWebViewClient extends WebViewClient {
 	static final public String WEB_VIEW_EVENT_PROTOCOL_CONFIG_KEY = "BitWebViewClient.WebView.Event.Protocol";
 	static final public String WEB_VIEW_EVENT_PROTOCOL_DEFAULT = "";
 	
-	protected WebViewActivityHandler webView = null;
-	protected ProgressBar progressBar = null;
+	protected WebViewFragment webViewFragment = null;
 	
-	public BitWebViewClient(WebViewActivityHandler webView, ProgressBar progressBar) {
-		this.webView = webView;
-		this.progressBar = progressBar;
+	public BitWebViewClient(WebViewFragment webViewFragment) {
+		this.webViewFragment = webViewFragment;
 	}
 	
 	public String getConfigName() {
-		return webView.getConfigName();
+		return webViewFragment.getConfigName();
 	}
 	
 	public String getWebViewEventProtocol() {
@@ -38,13 +34,11 @@ public class BitWebViewClient extends WebViewClient {
 	public boolean shouldOverrideUrlLoading(WebView view, String url) {
 		String webViewEventProtocol = getWebViewEventProtocol();
 		if(!Util.nullOrEmptyString(webViewEventProtocol) && url.startsWith(webViewEventProtocol)) {
-			webView.getActivity().onWebViewEvent(url);
+			webViewFragment.onWebViewEvent(url);
 			return true;
 		}
-		if(progressBar != null) {
-			progressBar.setVisibility(View.VISIBLE);
-		}
-		webView.getActivity().setTitle(Uri.parse(url).getHost());
+		webViewFragment.showProgressBar();
+		webViewFragment.getActivity().setTitle(Uri.parse(url).getHost());
 		return false;
 	}
 
@@ -64,10 +58,8 @@ public class BitWebViewClient extends WebViewClient {
 
 	@Override
 	public void onPageFinished(WebView view, String url) {
-		if(progressBar != null) {
-			progressBar.setVisibility(View.GONE);
-		}
-		webView.getActivity().setTitle(view.getTitle());
+		webViewFragment.hideProgressBar();
+		webViewFragment.getActivity().setTitle(view.getTitle());
 		CookieSyncManager.getInstance().sync();
 		super.onPageFinished(view, url);
 	}
