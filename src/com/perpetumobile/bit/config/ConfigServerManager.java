@@ -1,6 +1,8 @@
 package com.perpetumobile.bit.config;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -112,13 +114,10 @@ public class ConfigServerManager {
 			}
 		}
 		
-		// clean previous config files
-		String[] fileList = context.fileList();
-		for(String file : fileList) {
-			if(file.endsWith(".config.txt") && !file.equals(Config.CONFIG_LOCAL_FILE)) {
-				context.deleteFile(file);
-			}
-		}
+		File dir = Config.getConfigPropertiesDir();
+		Util.deleteDirectory(dir);
+		// re-create directory
+		dir = Config.getConfigPropertiesDir();
 		
 		for(HttpResponseDocument doc : docList) {
 			String url = doc.getSourceUrl();
@@ -126,7 +125,7 @@ public class ConfigServerManager {
 			if(index != -1) {
 				String fileName = url.substring(index+1); 
 				try {
-					BufferedOutputStream out = new BufferedOutputStream(context.openFileOutput(fileName, Context.MODE_PRIVATE));
+					BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(dir, fileName)));
 					out.write(doc.getPageSource().getBytes());
 					out.close();
 				} catch (IOException e) {

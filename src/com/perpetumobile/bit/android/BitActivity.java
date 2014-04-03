@@ -4,10 +4,13 @@ import com.perpetumobile.bit.android.fragments.WebViewFragment;
 import com.perpetumobile.bit.android.handlers.DrawerActivityHandler;
 import com.perpetumobile.bit.android.handlers.SearchViewActivityHandler;
 import com.perpetumobile.bit.config.Config;
+import com.perpetumobile.bit.util.Logger;
 
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ComponentName;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -16,6 +19,7 @@ import android.view.MenuItem;
 import android.webkit.CookieSyncManager;
 
 public class BitActivity extends Activity {
+	static private Logger logger = new Logger(BitActivity.class);
 
 	static final public String ACTIVITY_EXTRA = "com.perpetumobile.bit.android.ACTIVITY_EXTRA";
 	static final public String ACTIVITY_URL = "com.perpetumobile.bit.android.ACTIVITY_URL";
@@ -64,6 +68,12 @@ public class BitActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		DataSingleton.getInstance().setAssetManager(getAssets());
 		DataSingleton.getInstance().setAppContext(getApplicationContext());
+		try {
+			PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			DataSingleton.getInstance().setConfigVersion(pInfo.versionName);
+		} catch (NameNotFoundException e) {
+			logger.error("BitActivity.onCreate exception", e);
+		}
 		CookieSyncManager.createInstance(getApplicationContext());
 		setContentView(layoutId);
 		overridePendingTransition(android.R.anim.fade_in , android.R.anim.fade_out);

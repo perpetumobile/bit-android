@@ -1,14 +1,14 @@
 package com.perpetumobile.bit.config;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
-import android.content.Context;
-
-import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Util;
 
 /**
@@ -40,8 +40,7 @@ public class ConfigProperties {
 	
 	protected InputStream getInputStream(String fileName) 
 	throws IOException {
-		Context context  = DataSingleton.getInstance().getAppContext();
-		return context.openFileInput(fileName);
+		return new BufferedInputStream(new FileInputStream(new File(Config.getConfigPropertiesDir(), fileName)));
 	}
 
 	protected void putAll(ConfigProperties src) {

@@ -16,6 +16,7 @@ public class DataSingleton {
 	
 	protected Context appContext;
 	protected AssetManager assetManager;
+	protected String configVersion;
 	
 	// general purpose object map
 	protected HashMap<String, Object> map = new HashMap<String, Object>();
@@ -42,6 +43,14 @@ public class DataSingleton {
 		this.assetManager = assetManager;
 	}
 	
+	public String getConfigVersion() {
+		return configVersion;
+	}
+
+	public void setConfigVersion(String configVersion) {
+		this.configVersion = configVersion;
+	}
+
 	public Object get(String key) {
 		synchronized(map) {
 			return map.get(key);

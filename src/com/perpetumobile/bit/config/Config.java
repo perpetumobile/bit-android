@@ -1,8 +1,12 @@
 package com.perpetumobile.bit.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.TimerTask;
 
+import android.content.Context;
+
+import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.TimerManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -15,6 +19,21 @@ final public class Config {
 	static private Config instance = new Config();
 	static public Config getInstance() { return instance; }
 	
+	final static public String CONFIG_PROPERTIES_DIRECTORY_NAME = "properties";
+	static public File getConfigPropertiesDir() {
+		Context context  = DataSingleton.getInstance().getAppContext();
+		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
+		File versionDir = dir;
+		String version = DataSingleton.getInstance().getConfigVersion();
+		if(!Util.nullOrEmptyString(version)) {
+			versionDir = new File(dir, version);
+			if(!versionDir.exists()) {
+				versionDir.mkdir();
+			}
+		}
+		return versionDir;
+	}
+	
 	final static public String CONFIG_LOCAL_FILE = "local.config.txt";
 	final static public String CONFIG_ROOT_FILE = "root.config.txt";
 	
@@ -23,6 +42,7 @@ final public class Config {
 	private ArrayList<ConfigSubscriber> subscriberList = new ArrayList<ConfigSubscriber>();
 	
 	private Config() {
+		cleanConfigPropertiesDirectory();
 		reset(false);
 		
 		// schedule the reset task
@@ -54,7 +74,7 @@ final public class Config {
 		}
 		try {
 			// load local properties if available
-			ConfigProperties localProperties = new ConfigProperties(CONFIG_LOCAL_FILE);
+			ConfigProperties localProperties = new LocalConfigProperties(CONFIG_LOCAL_FILE);
 			tmpProperties.putAll(localProperties);
 		} catch (ConfigPropertiesException e) {	
 		} 
@@ -67,6 +87,18 @@ final public class Config {
 		}
 		
 		publish();
+	}
+	
+	protected void cleanConfigPropertiesDirectory() {
+		Context context  = DataSingleton.getInstance().getAppContext();
+		String version = DataSingleton.getInstance().getConfigVersion();
+		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
+		File[] list = dir.listFiles();
+		for(File file : list) {
+			if(file.isDirectory() && !file.getName().equals(version)) {
+				Util.deleteDirectory(file);
+			}
+		}
 	}
 	
 	/**
