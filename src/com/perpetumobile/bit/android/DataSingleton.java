@@ -3,12 +3,17 @@ package com.perpetumobile.bit.android;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
+import com.perpetumobile.bit.util.Logger;
+
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
 
 public class DataSingleton {
 	static private DataSingleton instance = new DataSingleton();
 	static public DataSingleton getInstance() { return instance; }
+	
+	static private Logger logger = new Logger(DataSingleton.class);
 	
 	static final public String BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME = "BitService";
 	
@@ -16,7 +21,6 @@ public class DataSingleton {
 	
 	protected Context appContext;
 	protected AssetManager assetManager;
-	protected String configVersion;
 	
 	// general purpose object map
 	protected HashMap<String, Object> map = new HashMap<String, Object>();
@@ -43,12 +47,16 @@ public class DataSingleton {
 		this.assetManager = assetManager;
 	}
 	
-	public String getConfigVersion() {
-		return configVersion;
-	}
-
-	public void setConfigVersion(String configVersion) {
-		this.configVersion = configVersion;
+	public String getAppVersion() {
+		String result = null;
+		try {
+			Context context = getAppContext();
+			PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+			result  = pInfo.versionName;
+		} catch (Exception e) {
+			logger.error("DataSingleton.getAppVersion exception", e);
+		}
+		return (result != null ? result : "");
 	}
 
 	public Object get(String key) {

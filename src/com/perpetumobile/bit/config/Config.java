@@ -24,7 +24,7 @@ final public class Config {
 		Context context  = DataSingleton.getInstance().getAppContext();
 		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
 		File versionDir = dir;
-		String version = DataSingleton.getInstance().getConfigVersion();
+		String version = DataSingleton.getInstance().getAppVersion();
 		if(!Util.nullOrEmptyString(version)) {
 			versionDir = new File(dir, version);
 			if(!versionDir.exists()) {
@@ -91,7 +91,7 @@ final public class Config {
 	
 	protected void cleanConfigPropertiesDirectory() {
 		Context context  = DataSingleton.getInstance().getAppContext();
-		String version = DataSingleton.getInstance().getConfigVersion();
+		String version = DataSingleton.getInstance().getAppVersion();
 		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
 		File[] list = dir.listFiles();
 		for(File file : list) {
