@@ -491,10 +491,10 @@ final public class Util {
 		return System.currentTimeMillis() * 1000;
 	}
 	
-	static public StringBuffer readFile(String fileName) 
+	static public StringBuffer readFile(File file) 
 	throws IOException {
 		StringBuffer result = new StringBuffer();
-		BufferedReader in = new BufferedReader(new FileReader(fileName));
+		BufferedReader in = new BufferedReader(new FileReader(file));
 		char[] buf = new char[1024];
 		while (in.read(buf) != -1) {
 			result.append(buf);
@@ -507,23 +507,34 @@ final public class Util {
 	 * save to file
 	 *
 	 * @param buf content to be saved in file
-	 * @param fileName file path and name 
-	 * @param delete delete file if exists
+	 * @param file 
 	 * @param append append bytes at the end else at the begining of file
 	 *
 	 * @throws IOException
 	 */    	
-	static public void saveToFile(StringBuffer buf, String fileName, boolean append)
-	throws IOException {				
-		File file = new File(fileName);
-		
+	static public void saveToFile(StringBuffer buf, File file, boolean append)
+	throws IOException {
+		saveToFile(buf.toString(), file, append); 
+	}
+	
+	/**
+	 * save to file
+	 *
+	 * @param content to be saved in file
+	 * @param file 
+	 * @param append append bytes at the end else at the begining of file
+	 *
+	 * @throws IOException
+	 */    	
+	static public void saveToFile(String content, File file, boolean append)
+	throws IOException {
 		if (!append && file.exists()) {
 			file.delete();
 		}
 		
 		OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(file, append), "UTF8");
 		
-		out.write(buf.toString());
+		out.write(content);
 		out.flush();
 		out.close(); 
 	}
@@ -542,14 +553,14 @@ final public class Util {
 		return dir.delete();
 	}
 
-	static public void fixEndOfLine(String fileName, boolean isUnix)
+	static public void fixEndOfLine(File file, boolean isUnix)
 	throws IOException {
-		StringBuffer buf = readFile(fileName);
+		StringBuffer buf = readFile(file);
 		buf = replaceAll(buf, "\r\n", "\n");
 		if(!isUnix) {
 			buf = replaceAll(buf, "\n", "\r\n");
 		}
-		saveToFile(buf, fileName, false);
+		saveToFile(buf, file, false);
 	}
 	
 	static public String encodeHtml(String str) {
