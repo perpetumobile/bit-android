@@ -7,6 +7,7 @@ import java.util.TimerTask;
 import android.content.Context;
 
 import com.perpetumobile.bit.android.DataSingleton;
+import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.util.TimerManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -21,17 +22,7 @@ final public class Config {
 	
 	final static public String CONFIG_PROPERTIES_DIRECTORY_NAME = "properties";
 	static public File getConfigPropertiesDir() {
-		Context context  = DataSingleton.getInstance().getAppContext();
-		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
-		File versionDir = dir;
-		String version = DataSingleton.getInstance().getAppVersion();
-		if(!Util.nullOrEmptyString(version)) {
-			versionDir = new File(dir, version);
-			if(!versionDir.exists()) {
-				versionDir.mkdir();
-			}
-		}
-		return versionDir;
+		return FileUtil.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME + "/" + DataSingleton.getInstance().getAppVersion());
 	}
 	
 	final static public String CONFIG_LOCAL_FILE = "local.config.txt";
