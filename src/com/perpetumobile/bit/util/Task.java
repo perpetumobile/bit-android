@@ -13,6 +13,8 @@ abstract public class Task implements Runnable {
 	private boolean done = false;
 	private Object doneLock = new Object();
 	
+	private boolean success = true;
+	
 	public Task() { 
 	}
 	
@@ -64,9 +66,17 @@ abstract public class Task implements Runnable {
 	@Override
 	public void run() {
 		start();
-		runImpl();
+		try {
+			runImpl();
+		} catch (Exception e) {
+			success = false;
+		}
 		done();
 	}
 	
-	abstract public void runImpl();
+	public boolean isSuccess() {
+		return success;
+	}
+
+	abstract public void runImpl() throws Exception;
 }

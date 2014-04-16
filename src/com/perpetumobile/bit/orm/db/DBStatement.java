@@ -441,7 +441,7 @@ public class DBStatement<T extends DBRecord> {
 		return (T[])result;
 	}
 	
-	public T readDBRecord(DBConnection dbConnection, ResultSet rs)
+	protected T readDBRecord(DBConnection dbConnection, ResultSet rs)
 	throws SQLException, Exception {
 		T result = createDBRecord();
 		int index = result.readRecord(dbConnection, rs, 1);
@@ -550,7 +550,7 @@ public class DBStatement<T extends DBRecord> {
 		int result = 0;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String strSQL = "SELECT LAST_INSERT_ID()";
+		String strSQL = "SELECT LAST_INSERT_ROWID()";
 		int sqlLogIndex = startSQL(strSQL);
 		try {
 			stmt = dbConnection.getConnection().createStatement();

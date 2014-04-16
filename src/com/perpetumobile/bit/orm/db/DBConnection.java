@@ -1,11 +1,16 @@
 package com.perpetumobile.bit.orm.db;
 
 
+import java.io.File;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.orm.record.RecordConnection;
 import com.perpetumobile.bit.util.Logger;
@@ -49,8 +54,17 @@ public class DBConnection extends RecordConnection<Connection> {
 	}
 	
 	public void connect() {
-		if(connection == null) {         
-			connection = connect(url+database);
+		if(connection == null) {
+			Context context = DataSingleton.getInstance().getAppContext();
+			// make sure that database exists
+			SQLiteDatabase db = context.openOrCreateDatabase(database, Context.MODE_PRIVATE, null);
+			if(db != null) { 
+				// close native connection to avoid connection leak
+				db.close();
+				// now open jdbc connection
+				File f = context.getDatabasePath(database);
+				connection = connect(url+f.getAbsolutePath());
+			}
 		}
 	}
 	
