@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.Util;
 
 import android.webkit.CookieManager;
@@ -18,6 +19,7 @@ import android.webkit.CookieManager;
  *
  */
 public class WebkitCookieManager extends CookieHandler {
+	static private Logger logger = new Logger(WebkitCookieManager.class);
 	
 	protected CookieManager cookieManager = CookieManager.getInstance();
 
@@ -45,6 +47,7 @@ public class WebkitCookieManager extends CookieHandler {
 				if(key != null && key.equalsIgnoreCase("Set-Cookie")) {
 					for(String val : responseHeaders.get(key)) {
 						cookieManager.setCookie(url, val);
+						logger.info("Url: " + uri.toString() + "\nSet-Cookie: " + val);
 					}
 				}
 			}
