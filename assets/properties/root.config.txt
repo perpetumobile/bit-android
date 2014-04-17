@@ -15,6 +15,7 @@ ConfigServerManager.Enable: false
 ##############################################
 # include additional configuration files
 ##############################################
-$include: db.config.txt
+$include: db.config.txt;\
+orm.config.txt
 
 

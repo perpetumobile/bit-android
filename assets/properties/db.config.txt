@@ -10,3 +10,13 @@ Database.User:
 Database.Password:
 Database.Url: jdbc:sqldroid:
 Database.Database:
+
+# DB Pool for schema db 
+Schema.Database.Database: schema
+
+
+###########################################
+## DB Schema Upgrade
+###########################################
+DBSchemaManager.Version.Required: 1.0
+DBSchemaManager.Version.UpgradeFrom.0: asset:schema/schema_ddl.txt Schema
