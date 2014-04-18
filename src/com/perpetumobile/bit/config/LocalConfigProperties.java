@@ -28,7 +28,7 @@ public class LocalConfigProperties extends ConfigProperties {
 	protected InputStream getInputStream(String fileName) 
 	throws IOException {
 		Context context  = DataSingleton.getInstance().getAppContext();
-		File dir = context.getDir(Config.CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
+		File dir = context.getDir(Config.CONFIG_PROPERTIES_DIRECTORY_PATH, Context.MODE_PRIVATE);
 		return new BufferedInputStream(new FileInputStream(new File(dir, fileName)));
 	}
 }

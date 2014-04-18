@@ -18,5 +18,8 @@ Schema.Database.Database: schema
 ###########################################
 ## DB Schema Upgrade
 ###########################################
+DBSchemaManager.Auto.Enable: true
+DBSchemaManager.Server.Enable: false
 DBSchemaManager.Version.Required: 1.0
+
 DBSchemaManager.Version.UpgradeFrom.0: asset:schema/schema_ddl.txt Schema

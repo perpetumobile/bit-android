@@ -106,6 +106,15 @@ final public class FileUtil {
 		return result;
 	}
 	
+	/**
+	 * Delete directory. Does nothing if directoryPath is prefixed with "asset:".
+	 */
+	static public void deleteDir(String directoryPath) {
+		if(!isAssetFile(directoryPath)) {
+			File dir = getDir(directoryPath);
+			Util.deleteDirectory(dir);
+		}
+	}
 	
 	/**
 	 * Return file. Returns null if filePath is prefixed with "asset:".

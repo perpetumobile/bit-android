@@ -7,7 +7,6 @@ import java.util.TimerTask;
 import android.content.Context;
 
 import com.perpetumobile.bit.android.DataSingleton;
-import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.util.TimerManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -20,10 +19,8 @@ final public class Config {
 	static private Config instance = new Config();
 	static public Config getInstance() { return instance; }
 	
-	final static public String CONFIG_PROPERTIES_DIRECTORY_NAME = "properties";
-	static public File getConfigPropertiesDir() {
-		return FileUtil.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME + "/" + DataSingleton.getInstance().getAppVersion());
-	}
+	final static public String CONFIG_PROPERTIES_DIRECTORY_PATH = "properties";
+	final static public String CONFIG_PROPERTIES_VERSION_DIRECTORY_PATH() { return CONFIG_PROPERTIES_DIRECTORY_PATH + "/" + DataSingleton.getInstance().getAppVersion(); }
 	
 	final static public String CONFIG_LOCAL_FILE = "local.config.txt";
 	final static public String CONFIG_ROOT_FILE = "root.config.txt";
@@ -83,7 +80,7 @@ final public class Config {
 	protected void cleanConfigPropertiesDirectory() {
 		Context context  = DataSingleton.getInstance().getAppContext();
 		String version = DataSingleton.getInstance().getAppVersion();
-		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_NAME, Context.MODE_PRIVATE);
+		File dir = context.getDir(CONFIG_PROPERTIES_DIRECTORY_PATH, Context.MODE_PRIVATE);
 		File[] list = dir.listFiles();
 		for(File file : list) {
 			if(file.isDirectory() && !file.getName().equals(version)) {
@@ -105,7 +102,7 @@ final public class Config {
 	
 	protected void publish() {
 		for(ConfigSubscriber subscriber : subscriberList) {
-			subscriber.configReset();
+			subscriber.onConfigReset();
 		}
 	}
 	

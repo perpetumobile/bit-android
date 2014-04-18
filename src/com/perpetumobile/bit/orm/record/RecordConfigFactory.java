@@ -48,7 +48,7 @@ abstract public class RecordConfigFactory<T extends RecordConfig> implements Con
 	}
 
 	@Override
-	public void configReset() {
+	public void onConfigReset() {
 		synchronized(lock) {
 			recordConfigs = new HashMap<String, T>();
 		}

@@ -1,14 +1,13 @@
 package com.perpetumobile.bit.config;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
+import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.util.Util;
 
 /**
@@ -40,7 +39,8 @@ public class ConfigProperties {
 	
 	protected InputStream getInputStream(String fileName) 
 	throws IOException {
-		return new BufferedInputStream(new FileInputStream(new File(Config.getConfigPropertiesDir(), fileName)));
+		String filePath = Config.CONFIG_PROPERTIES_VERSION_DIRECTORY_PATH() + "/" + fileName;
+		return new BufferedInputStream(FileUtil.getFileInputStream(filePath));
 	}
 
 	protected void putAll(ConfigProperties src) {
