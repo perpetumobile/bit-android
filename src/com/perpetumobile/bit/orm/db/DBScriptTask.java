@@ -9,8 +9,6 @@ public class DBScriptTask extends Task {
 	protected DBScriptMethod method = null;
 	protected String dbRecordConfigName = null;
 	protected int batchSize = 100;
-	
-	protected String intentActionSuffix = null;
 
 	public DBScriptTask() {
 	}
@@ -22,12 +20,6 @@ public class DBScriptTask extends Task {
 		} else if(method == DBScriptMethod.EXECUTE) {
 			DBScriptManager.getInstance().executeImpl(filePath, dbConfigName);
 		}
-	}
-
-	@Override
-	public void run() {
-		super.run();
-		DBScriptManager.getInstance().sendBroadcast(intentActionSuffix, this);
 	}
 
 	public void setFilePath(String filePath) {
@@ -48,9 +40,5 @@ public class DBScriptTask extends Task {
 	
 	public void setBatchSize(int batchSize) {
 		this.batchSize = batchSize;
-	}
-
-	public void setIntentActionSuffix(String intentActionSuffix) {
-		this.intentActionSuffix = intentActionSuffix;
 	}
 }

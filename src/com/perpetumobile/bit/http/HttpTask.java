@@ -9,7 +9,6 @@ import com.perpetumobile.bit.util.Task;
 public class HttpTask extends Task {
 	
 	protected HttpRequest httpRequest = new HttpRequest(); 
-	protected String intentActionSuffix = null;
 	
 	protected HttpResponseDocument result = null;
 	
@@ -20,12 +19,6 @@ public class HttpTask extends Task {
 	public void runImpl() {
 		result = HttpManager.getInstance().executeImpl(httpRequest);
 	}
-	
-	@Override
-	public void run() {
-		super.run();
-		HttpManager.getInstance().sendBroadcast(intentActionSuffix, result);
-	}
 
 	public HttpResponseDocument getResult() {
 		return result;
@@ -33,9 +26,5 @@ public class HttpTask extends Task {
 
 	public void setHttpRequest(HttpRequest httpRequest) {
 		this.httpRequest = httpRequest;
-	}
-
-	public void setIntentActionSuffix(String intentActionSuffix) {
-		this.intentActionSuffix = intentActionSuffix;
 	}
 }

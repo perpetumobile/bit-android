@@ -2,8 +2,6 @@ package com.perpetumobile.bit.orm.db;
 
 import java.util.ArrayList;
 
-import android.content.Context;
-
 import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.config.ConfigSubscriber;
@@ -120,20 +118,16 @@ public class DBSchemaManager implements ConfigSubscriber {
 	static final public String DB_SCHEMA_MANAGER_SERVER_URLS_KEY = "DBSchemaManager.Server.URLs";
 	
 	static final public String DB_SCHEMA_MANAGER_SERVER_HTTP_REQUEST_CLASS_KEY = "DBSchemaManager.Server.HttpRequest.Class";
-	static final public String DB_SCHEMA_MANAGER_SERVER_INTENT_ACTION_SUFFIX = "DBSchemaManager.Server.INTENT_ACTION_SUFFIX";
 	static final public String DB_SCHEMA_MANAGER_SERVER_THREAD_POOL_NAME = "DBSchemaService";
 	
 	static final public String DB_SCHEMA_MANAGER_SERVER_DIRECTORY_KEY = "DBSchemaManager.Server.Directory";
 	static final public String DB_SCHEMA_MANAGER_SERVER_DIRECTORY_DEFAULT = "schema";
 	
-	protected BatchHttpRequest batchHttpRequest = new BatchHttpRequest(Config.getInstance().getProperty(DB_SCHEMA_MANAGER_SERVER_HTTP_REQUEST_CLASS_KEY, null), 
-			DB_SCHEMA_MANAGER_SERVER_INTENT_ACTION_SUFFIX,
-			DB_SCHEMA_MANAGER_SERVER_THREAD_POOL_NAME) {
-		
+	protected BatchHttpRequest batchHttpRequest = new BatchHttpRequest(Config.getInstance().getProperty(DB_SCHEMA_MANAGER_SERVER_HTTP_REQUEST_CLASS_KEY, null),	DB_SCHEMA_MANAGER_SERVER_THREAD_POOL_NAME) {
 		@Override
-		protected void onResponse(Context context, ArrayList<HttpResponseDocument> result) {
+		protected void onResponse(ArrayList<HttpResponseDocument> result) {
 			String directoryPath = Config.getInstance().getProperty(DB_SCHEMA_MANAGER_SERVER_DIRECTORY_KEY, DB_SCHEMA_MANAGER_SERVER_DIRECTORY_DEFAULT);
-			if(save(directoryPath, context, result)) {
+			if(save(directoryPath, result)) {
 				try {
 					upgrade();
 				} catch (Exception e) {

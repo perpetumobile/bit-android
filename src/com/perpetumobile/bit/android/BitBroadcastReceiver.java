@@ -4,15 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpResponseDocument;
-import com.perpetumobile.bit.orm.db.DBStatementManager;
 import com.perpetumobile.bit.orm.db.DBStatementTask;
-import com.perpetumobile.bit.orm.json.JSONParserManager;
 import com.perpetumobile.bit.orm.json.JSONRecord;
-import com.perpetumobile.bit.orm.xml.SAXParserManager;
 import com.perpetumobile.bit.orm.xml.XMLRecord;
 
+
+@Deprecated
 public class BitBroadcastReceiver extends BroadcastReceiver {
 	
 	public BitBroadcastReceiver(){
@@ -20,6 +18,7 @@ public class BitBroadcastReceiver extends BroadcastReceiver {
 	
     @Override
     public void onReceive(Context context, Intent intent) {
+    	/*
     	String action = intent.getAction();
     	if(action != null && action.startsWith(HttpManager.HTTP_MANAGER_INTENT_ACTION_PREFIX)){
         	// HttpResponseDocument doc = (HttpResponseDocument) intent.getParcelableExtra(HttpManager.HTTP_MANAGER_INTENT_EXTRA);
@@ -39,6 +38,7 @@ public class BitBroadcastReceiver extends BroadcastReceiver {
         	DBStatementTask result = (DBStatementTask)DataSingleton.getInstance().getIntentExtra(intent.getStringExtra(DBStatementManager.BROADCAST_INTENT_EXTRA_KEY));
         	if(result != null) onDBStatementManagerBroadcastReceive(context, intent, intentActionSuffix, result);
         }
+        */
     }
     
     public void onHttpManagerBroadcastReceive(Context context, Intent intent, String intentActionSuffix, HttpResponseDocument result) {

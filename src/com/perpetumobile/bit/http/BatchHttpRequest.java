@@ -7,22 +7,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-
-import com.perpetumobile.bit.android.BitBroadcastReceiver;
 import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpRequest;
 import com.perpetumobile.bit.http.HttpResponseDocument;
 import com.perpetumobile.bit.util.Logger;
+import com.perpetumobile.bit.util.TaskCallback;
 import com.perpetumobile.bit.util.Util;
 
 abstract public class BatchHttpRequest {
 	static private Logger logger = new Logger(BatchHttpRequest.class);
-
-	// static final public String BATCH_HTTP_REQUEST_INTENT_ACTION_PREFIX = "com.perpetumobile.bit.http.BATCH_HTTP_REQUEST_INTENT_ACTION";
 	
 	private ArrayList<String> requestList = null;
 	private HashMap<String, String> requestMap = null;
@@ -31,21 +25,13 @@ abstract public class BatchHttpRequest {
 	private String httpRequestClassName = null;
 	
 	private String threadPoolManagerConfigName = null;
-	private String intentActionSuffix = null;
 	
 	private boolean isRequestPending = false;
 	private Object lock = new Object();
 	
-	public BatchHttpRequest(String httpRequestClassName, String intentActionSuffix, String threadPoolManagerConfigName) {
-		// super(BATCH_HTTP_REQUEST_INTENT_ACTION_PREFIX);
+	public BatchHttpRequest(String httpRequestClassName, String threadPoolManagerConfigName) {
 		this.httpRequestClassName = httpRequestClassName;
 		this.threadPoolManagerConfigName = threadPoolManagerConfigName;
-		this.intentActionSuffix = intentActionSuffix;
-		HttpManager.getInstance().registerReceiver(broadcastReceiver, intentActionSuffix);
-	}
-	
-	public void close() {
-		HttpManager.getInstance().unregisterReceiver(broadcastReceiver);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -87,22 +73,23 @@ abstract public class BatchHttpRequest {
 					httpRequest = new HttpRequest();
 				}
 				httpRequest.setUrl(url);
-				HttpManager.getInstance().execute(httpRequest, intentActionSuffix, threadPoolManagerConfigName);
+				HttpManager.getInstance().execute(callback, httpRequest, threadPoolManagerConfigName);
 			}
 		}
 	}
 	
-	private BroadcastReceiver broadcastReceiver = new BitBroadcastReceiver() {
+	private TaskCallback<HttpTask> callback = new TaskCallback<HttpTask>() {
 		@Override
-		public void onHttpManagerBroadcastReceive(Context context, Intent intent, String intentActionSuffix, HttpResponseDocument result) {
-			if(intentActionSuffix != null && intentActionSuffix.equals(intentActionSuffix)) {
+		public void onTaskDone(HttpTask task) {
+			if(task != null && task.isSuccess()) {
+				HttpResponseDocument result = task.getResult();
 				synchronized(lock) {
 					if(isRequestPending) {
 						if(requestMap.containsKey(result.getSourceUrl())) {
 							docList.add(result);
 						}
 						if(docList.size() == requestList.size()) {
-							onResponse(context, docList);
+							onResponse(docList);
 							isRequestPending = false;
 						}
 					}
@@ -111,9 +98,9 @@ abstract public class BatchHttpRequest {
 		}
 	};
 	
-	abstract protected void onResponse(Context context, ArrayList<HttpResponseDocument> docList);
+	abstract protected void onResponse(ArrayList<HttpResponseDocument> docList);
 	
-	protected boolean save(String directoryPath, Context context, ArrayList<HttpResponseDocument> docList) {
+	protected boolean save(String directoryPath, ArrayList<HttpResponseDocument> docList) {
 		if(Util.nullOrEmptyList(docList)) {
 			return false;
 		}

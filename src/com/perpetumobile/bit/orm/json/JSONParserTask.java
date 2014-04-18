@@ -12,8 +12,6 @@ public class JSONParserTask extends Task {
 	protected String configName = null;
 	protected StatementLogger stmtLogger = null;
 	
-	protected String intentActionSuffix = null;
-	
 	protected JSONRecord result = null;
 	
 	public JSONParserTask() {
@@ -26,12 +24,6 @@ public class JSONParserTask extends Task {
 		} else if (file != null) {
 			result = JSONParserManager.getInstance().parseImpl(file, configName, stmtLogger);
 		}
-	}
-	
-	@Override
-	public void run() {
-		super.run();
-		JSONParserManager.getInstance().sendBroadcast(intentActionSuffix, result);
 	}
 	
 	public JSONRecord getResult() {
@@ -52,9 +44,5 @@ public class JSONParserTask extends Task {
 
 	public void setStmtLogger(StatementLogger stmtLogger) {
 		this.stmtLogger = stmtLogger;
-	}
-
-	public void setIntentActionSuffix(String intentActionSuffix) {
-		this.intentActionSuffix = intentActionSuffix;
 	}
 }

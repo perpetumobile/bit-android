@@ -5,25 +5,25 @@ import java.io.IOException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import com.perpetumobile.bit.android.BitBroadcastManager;
+import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.android.FileUtil;
 import com.perpetumobile.bit.orm.record.RecordScriptData;
 import com.perpetumobile.bit.orm.record.StatementLoggerImpl;
 import com.perpetumobile.bit.orm.record.field.Field;
 import com.perpetumobile.bit.util.Logger;
+import com.perpetumobile.bit.util.Task;
+import com.perpetumobile.bit.util.TaskCallback;
+import com.perpetumobile.bit.util.ThreadPoolManager;
 import com.perpetumobile.bit.util.Util;
 
 
-public class DBScriptManager extends BitBroadcastManager {
+public class DBScriptManager {
 	static private DBScriptManager instance = new DBScriptManager();
 	static public DBScriptManager getInstance() { return instance; }
 	
 	static private Logger logger = new Logger(DBScriptManager.class);
 	
-	static final public String DB_SCRIPT_MANAGER_INTENT_ACTION_PREFIX = "com.perpetumobile.bit.orm.db.DB_SCRIPT_MANAGER_INTENT_ACTION.";
-	
 	private DBScriptManager() {
-		super(DB_SCRIPT_MANAGER_INTENT_ACTION_PREFIX);
 	}
 	
 	/**
@@ -130,6 +130,21 @@ public class DBScriptManager extends BitBroadcastManager {
 		return task;
 	}
 	
+	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
+		try {
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
+			if(isSync) {
+				task.isDone();
+			}
+		} catch (Exception e) {
+			logger.error("DBScriptManager.runTask exception", e);
+		}
+	}
+	
 	/**
 	 * Load is executed in a Bit Service Thread.
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
@@ -157,29 +172,24 @@ public class DBScriptManager extends BitBroadcastManager {
 	/**
 	 * Load is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * dbConfigName is used as a intentActionSuffix.
 	 * 
 	 * If file is in the Asset directory the filePath param should be prefixed with "asset:". 
 	 */
-	public void load(String filePath, String dbConfigName, String dbRecordConfigName, int batchSize) {
-		load(filePath, dbConfigName, dbRecordConfigName, batchSize, null);
+	public void load(TaskCallback<DBScriptTask>callback, String filePath, String dbConfigName, String dbRecordConfigName, int batchSize) {
+		load(callback, filePath, dbConfigName, dbRecordConfigName, batchSize, null);
 	}
 	
 	/**
 	 * Load is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * dbConfigName is used as a intentActionSuffix.
 	 * 
 	 * If file is in the Asset directory the filePath param should be prefixed with "asset:".
 	 */
-	public void load(String filePath, String dbConfigName, String dbRecordConfigName, int batchSize, String threadPoolManagerConfigName) {
+	public void load(TaskCallback<DBScriptTask>callback, String filePath, String dbConfigName, String dbRecordConfigName, int batchSize, String threadPoolManagerConfigName) {
 		DBScriptTask task = createDBScriptTask(filePath, dbConfigName, DBScriptMethod.LOAD);
 		task.setDBRecordConfigName(dbRecordConfigName);
 		task.setBatchSize(batchSize);
+		task.setCallback(callback);
 		runTask(task, threadPoolManagerConfigName, false);
 	}
 	
@@ -208,27 +218,22 @@ public class DBScriptManager extends BitBroadcastManager {
 	/**
 	 * Execute is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * dbConfigName is used as a intentActionSuffix.
 	 * 
 	 * If file is in the Asset directory the filePath param should be prefixed with "asset:". 
 	 */
-	public void execute(String filePath, String dbConfigName) {
-		execute(filePath, dbConfigName, null);
+	public void execute(TaskCallback<DBScriptTask>callback, String filePath, String dbConfigName) {
+		execute(callback, filePath, dbConfigName, null);
 	}
 	
 	/**
 	 * Load is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * dbConfigName is used as a intentActionSuffix.
 	 * 
 	 * If file is in the Asset directory the filePath param should be prefixed with "asset:".
 	 */
-	public void execute(String filePath, String dbConfigName, String threadPoolManagerConfigName) {
+	public void execute(TaskCallback<DBScriptTask>callback, String filePath, String dbConfigName, String threadPoolManagerConfigName) {
 		DBScriptTask task = createDBScriptTask(filePath, dbConfigName, DBScriptMethod.EXECUTE);
+		task.setCallback(callback);
 		runTask(task, threadPoolManagerConfigName, false);
 	}
 }

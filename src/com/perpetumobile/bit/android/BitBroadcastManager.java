@@ -2,9 +2,6 @@ package com.perpetumobile.bit.android;
 
 import java.util.UUID;
 
-import com.perpetumobile.bit.util.Logger;
-import com.perpetumobile.bit.util.Task;
-import com.perpetumobile.bit.util.ThreadPoolManager;
 import com.perpetumobile.bit.util.Util;
 
 import android.content.BroadcastReceiver;
@@ -12,8 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+@Deprecated
 public class BitBroadcastManager {
-	static private Logger logger = new Logger(BitBroadcastManager.class);
 
 	static final public String BROADCAST_INTENT_EXTRA_KEY = "com.perpetumobile.bit.android.BROADCAST_INTENT_EXTRA_KEY";
 	
@@ -21,21 +18,6 @@ public class BitBroadcastManager {
 			
 	public BitBroadcastManager(String intentActionPrefix) {
 		this.intentActionPrefix = intentActionPrefix;
-	}
-	
-	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-			if(isSync) {
-				task.isDone();
-			}
-		} catch (Exception e) {
-			logger.error("BitBroadcastManager.runTask exception", e);
-		}
 	}
 	
 	public String getIntentAction(String intentActionSuffix) {

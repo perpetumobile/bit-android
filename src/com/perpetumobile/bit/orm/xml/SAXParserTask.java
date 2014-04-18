@@ -14,8 +14,6 @@ public class SAXParserTask extends Task {
 	protected String rootElementName = null;
 	protected StatementLogger stmtLogger = null;
 	
-	protected String intentActionSuffix = null;
-	
 	protected XMLRecord result = null;
 	
 	public SAXParserTask() {
@@ -28,12 +26,6 @@ public class SAXParserTask extends Task {
 		} else if (file != null) {
 			result = SAXParserManager.getInstance().parseImpl(file, configNamePrefix, rootElementName, stmtLogger);
 		}
-	}
-	
-	@Override
-	public void run() {
-		super.run();
-		SAXParserManager.getInstance().sendBroadcast(intentActionSuffix, result);
 	}
 	
 	public XMLRecord getResult() {
@@ -58,9 +50,5 @@ public class SAXParserTask extends Task {
 
 	public void setStmtLogger(StatementLogger stmtLogger) {
 		this.stmtLogger = stmtLogger;
-	}
-	
-	public void setIntentActionSuffix(String intentActionSuffix) {
-		this.intentActionSuffix = intentActionSuffix;
 	}
 }

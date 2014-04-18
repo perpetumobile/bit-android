@@ -9,13 +9,14 @@ import java.io.StringReader;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.json.simple.parser.JSONParser;
 
-import com.perpetumobile.bit.android.BitBroadcastManager;
 import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpRequest;
 import com.perpetumobile.bit.orm.record.StatementLog;
 import com.perpetumobile.bit.orm.record.StatementLogger;
 import com.perpetumobile.bit.util.Logger;
+import com.perpetumobile.bit.util.Task;
+import com.perpetumobile.bit.util.TaskCallback;
 import com.perpetumobile.bit.util.ThreadPoolManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -24,18 +25,15 @@ import com.perpetumobile.bit.util.Util;
  * @author Zoran Dukic
  *
  */
-public class JSONParserManager extends BitBroadcastManager {
+public class JSONParserManager {
 	static private JSONParserManager instance = new JSONParserManager();
 	static public JSONParserManager getInstance() { return instance; }
 	
 	static private Logger logger = new Logger(JSONParserManager.class);
 	
-	static final public String JSON_PARSER_MANAGER_INTENT_ACTION_PREFIX = "com.perpetumobile.bit.orm.json.JSON_PARSER_MANAGER_INTENT_ACTION.";
-	
 	private GenericObjectPool pool = null;
 	
 	private JSONParserManager() {
-		super(JSON_PARSER_MANAGER_INTENT_ACTION_PREFIX);
 		init();
 	}
 	
@@ -141,6 +139,21 @@ public class JSONParserManager extends BitBroadcastManager {
 		}
 	}
 	
+	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
+		try {
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
+			if(isSync) {
+				task.isDone();
+			}
+		} catch (Exception e) {
+			logger.error("JSONParserManager.runTask exception", e);
+		}
+	}
+	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
@@ -166,16 +179,7 @@ public class JSONParserManager extends BitBroadcastManager {
 		task.setHttpRequest(httpRequest);
 		task.setConfigName(configName);
 		task.setStmtLogger(stmtLogger);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-			task.isDone();
-		} catch (Exception e) {
-			logger.error("JSONParserManager.parse exception", e);
-		}
+		runTask(task, threadPoolManagerConfigName, true);
 		return task.getResult();
 	}
 	
@@ -204,110 +208,65 @@ public class JSONParserManager extends BitBroadcastManager {
 		task.setFile(file);
 		task.setConfigName(configName);
 		task.setStmtLogger(stmtLogger);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-			task.isDone();
-		} catch (Exception e) {
-			logger.error("JSONParserManager.parse exception", e);
-		}
+		runTask(task, threadPoolManagerConfigName, true);
 		return task.getResult();
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
 	 */
-	public void parse(HttpRequest httpRequest, String configName) {
-		parse(httpRequest, configName, null, null);
+	public void parse(TaskCallback<JSONParserTask> callback, HttpRequest httpRequest, String configName) {
+		parse(callback, httpRequest, configName, null, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
 	 */
-	public void parse(HttpRequest httpRequest, String configName, String threadPoolManagerConfigName) {
-		parse(httpRequest, configName, threadPoolManagerConfigName, null);
+	public void parse(TaskCallback<JSONParserTask> callback, HttpRequest httpRequest, String configName, String threadPoolManagerConfigName) {
+		parse(callback, httpRequest, configName, threadPoolManagerConfigName, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configName is used as a intentActionSuffix.
 	 */
-	public void parse(HttpRequest httpRequest, String configName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
-		// registerReceiver must not be called multiple times
-		// client needs to explicitly register using registerReceiver method
-		// registerReceiver(broadcastReceiver, configName);
+	public void parse(TaskCallback<JSONParserTask> callback, HttpRequest httpRequest, String configName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		JSONParserTask task = new JSONParserTask();
 		task.setHttpRequest(httpRequest);
 		task.setConfigName(configName);
 		task.setStmtLogger(stmtLogger);
-		task.setIntentActionSuffix(configName);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-		} catch (Exception e) {
-			logger.error("JSONParserManager.parse exception", e);
-		}
+		task.setCallback(callback);
+		runTask(task, threadPoolManagerConfigName, false);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configName is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configName) {
-		parse(file, configName, null, null);
+	public void parse(TaskCallback<JSONParserTask> callback, File file, String configName) {
+		parse(callback, file, configName, null, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configName is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configName, String threadPoolManagerConfigName) {
-		parse(file, configName, threadPoolManagerConfigName, null);
+	public void parse(TaskCallback<JSONParserTask> callback, File file, String configName, String threadPoolManagerConfigName) {
+		parse(callback, file, configName, threadPoolManagerConfigName, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configName is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
-		// registerReceiver must not be called multiple times
-		// client needs to explicitly register using registerReceiver method
-		// registerReceiver(broadcastReceiver, configName);
+	public void parse(TaskCallback<JSONParserTask> callback, File file, String configName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		JSONParserTask task = new JSONParserTask();
 		task.setFile(file);
 		task.setConfigName(configName);
 		task.setStmtLogger(stmtLogger);
-		task.setIntentActionSuffix(configName);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-		} catch (Exception e) {
-			logger.error("JSONParserManager.parse exception", e);
-		}
+		task.setCallback(callback);
+		runTask(task, threadPoolManagerConfigName, false);
 	}
 }

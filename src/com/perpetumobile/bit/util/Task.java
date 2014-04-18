@@ -15,9 +15,16 @@ abstract public class Task implements Runnable {
 	
 	private boolean success = true;
 	
+	protected TaskCallback<Task> callback = null;
+	
 	public Task() { 
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public void setCallback(TaskCallback<? extends Task> callback) {
+		this.callback = (TaskCallback<Task>)callback;
+	}
+
 	public void reset() {
 		started = false;
 		done = false;
@@ -72,6 +79,7 @@ abstract public class Task implements Runnable {
 			success = false;
 		}
 		done();
+		if(callback != null) callback.onTaskDone(this);
 	}
 	
 	public boolean isSuccess() {

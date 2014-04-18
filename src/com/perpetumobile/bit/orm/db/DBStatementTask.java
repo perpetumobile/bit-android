@@ -14,8 +14,6 @@ public class DBStatementTask extends Task {
 	protected DBRecord record = null;
 	protected ArrayList<DBRecord> recordList = null;
 
-	protected String intentActionSuffix = null;
-
 	protected ArrayList<? extends DBRecord> resultList = null;
 	protected int result = 0;
 
@@ -43,12 +41,6 @@ public class DBStatementTask extends Task {
 		}
 	}
 
-	@Override
-	public void run() {
-		super.run();
-		DBStatementManager.getInstance().sendBroadcast(intentActionSuffix, this);
-	}
-
 	public void setDBConfigName(String dbConfigName) {
 		this.dbConfigName = dbConfigName;
 	}
@@ -71,10 +63,6 @@ public class DBStatementTask extends Task {
 
 	public void setRecordList(ArrayList<DBRecord> recordList) {
 		this.recordList = recordList;
-	}
-
-	public void setIntentActionSuffix(String intentActionSuffix) {
-		this.intentActionSuffix = intentActionSuffix;
 	}
 
 	public ArrayList<? extends DBRecord> getResultList() {

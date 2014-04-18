@@ -10,13 +10,14 @@ import javax.xml.parsers.SAXParser;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.xml.sax.InputSource;
 
-import com.perpetumobile.bit.android.BitBroadcastManager;
 import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpRequest;
 import com.perpetumobile.bit.orm.record.StatementLog;
 import com.perpetumobile.bit.orm.record.StatementLogger;
 import com.perpetumobile.bit.util.Logger;
+import com.perpetumobile.bit.util.Task;
+import com.perpetumobile.bit.util.TaskCallback;
 import com.perpetumobile.bit.util.ThreadPoolManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -25,18 +26,15 @@ import com.perpetumobile.bit.util.Util;
  * @author Zoran Dukic
  *
  */
-public class SAXParserManager extends BitBroadcastManager {
+public class SAXParserManager {
 	static private Logger logger = new Logger(SAXParserManager.class);
 	
 	static private SAXParserManager instance = new SAXParserManager();
 	static public SAXParserManager getInstance() { return instance; }
 	
-	static final public String SAX_PARSER_MANAGER_INTENT_ACTION_PREFIX = "com.perpetumobile.bit.orm.xml.SAX_PARSER_MANAGER_INTENT_ACTION.";
-	
 	private GenericObjectPool pool = null;
 	
 	private SAXParserManager() {
-		super(SAX_PARSER_MANAGER_INTENT_ACTION_PREFIX);
 		init();
 	}
 	
@@ -144,6 +142,21 @@ public class SAXParserManager extends BitBroadcastManager {
 		}
 	}
 	
+	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
+		try {
+			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
+				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+			} else {
+				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
+			}
+			if(isSync) {
+				task.isDone();
+			}
+		} catch (Exception e) {
+			logger.error("SAXParserManager.runTask exception", e);
+		}
+	}
+	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Blocking mode: Current thread is waiting for operation to complete and return result.
@@ -170,16 +183,7 @@ public class SAXParserManager extends BitBroadcastManager {
 		task.setConfigNamePrefix(configNamePrefix);
 		task.setRootElementName(rootElementName);
 		task.setStmtLogger(stmtLogger);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-			task.isDone();
-		} catch (Exception e) {
-			logger.error("SAXParserManager.parse exception", e);
-		}
+		runTask(task, threadPoolManagerConfigName, true);
 		return task.getResult();
 	}
 
@@ -209,116 +213,67 @@ public class SAXParserManager extends BitBroadcastManager {
 		task.setConfigNamePrefix(configNamePrefix);
 		task.setRootElementName(rootElementName);
 		task.setStmtLogger(stmtLogger);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-			task.isDone();
-		} catch (Exception e) {
-			logger.error("SAXParserManager.parse exception", e);
-		}
+		runTask(task, threadPoolManagerConfigName, true);
 		return task.getResult();
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName) {
-		parse(httpRequest, configNamePrefix, rootElementName, null, null);
+	public void parse(TaskCallback<SAXParserTask> callback, HttpRequest httpRequest, String configNamePrefix, String rootElementName) {
+		parse(callback, httpRequest, configNamePrefix, rootElementName, null, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
-		parse(httpRequest, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
+	public void parse(TaskCallback<SAXParserTask> callback, HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
+		parse(callback, httpRequest, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
-		// registerReceiver must not be called multiple times
-		// client needs to explicitly register using registerReceiver method
-		// registerReceiver(broadcastReceiver, configNamePrefix);
+	public void parse(TaskCallback<SAXParserTask> callback, HttpRequest httpRequest, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		SAXParserTask task = new SAXParserTask();
 		task.setHttpRequest(httpRequest);
 		task.setConfigNamePrefix(configNamePrefix);
 		task.setRootElementName(rootElementName);
 		task.setStmtLogger(stmtLogger);
-		task.setIntentActionSuffix(configNamePrefix);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-		} catch (Exception e) {
-			logger.error("SAXParserManager.parse exception", e);
-		}
+		task.setCallback(callback);
+		runTask(task, threadPoolManagerConfigName, false);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configNamePrefix, String rootElementName) {
-		parse(file, configNamePrefix, rootElementName, null, null);
+	public void parse(TaskCallback<SAXParserTask> callback, File file, String configNamePrefix, String rootElementName) {
+		parse(callback, file, configNamePrefix, rootElementName, null, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
-		parse(file, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
+	public void parse(TaskCallback<SAXParserTask> callback, File file, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName) {
+		parse(callback, file, configNamePrefix, rootElementName, threadPoolManagerConfigName, null);
 	}
 	
 	/**
 	 * Parse is executed in a Bit Service Thread if threadPoolManagerConfigName is not provided.
 	 * Non-Blocking mode: Current thread is NOT waiting for operation to complete.
-	 * Broadcast will be sent to broadcast receiver after operation is completed.
-	 * Broadcast receiver needs to be registered using registerReceiver method.
-	 * configNamePrefix is used as a intentActionSuffix.
 	 */
-	public void parse(File file, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
-		// registerReceiver must not be called multiple times
-		// client needs to explicitly register using registerReceiver method
-		// registerReceiver(broadcastReceiver, configNamePrefix);
+	public void parse(TaskCallback<SAXParserTask> callback, File file, String configNamePrefix, String rootElementName, String threadPoolManagerConfigName, StatementLogger stmtLogger) {
 		SAXParserTask task = new SAXParserTask();
 		task.setFile(file);
 		task.setConfigNamePrefix(configNamePrefix);
 		task.setRootElementName(rootElementName);
 		task.setStmtLogger(stmtLogger);
-		task.setIntentActionSuffix(configNamePrefix);
-		try {
-			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
-			} else {
-				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
-			}
-		} catch (Exception e) {
-			logger.error("SAXParserManager.parse exception", e);
-		}
+		task.setCallback(callback);
+		runTask(task, threadPoolManagerConfigName, false);
 	}
 }
