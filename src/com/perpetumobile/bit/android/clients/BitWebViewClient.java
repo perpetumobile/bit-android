@@ -5,8 +5,10 @@ import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.util.Util;
 
 import android.net.Uri;
+import android.net.http.SslError;
 import android.view.KeyEvent;
 import android.webkit.CookieSyncManager;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -15,6 +17,8 @@ public class BitWebViewClient extends WebViewClient {
 	
 	static final public String WEB_VIEW_EVENT_PROTOCOL_CONFIG_KEY = "BitWebViewClient.WebView.Event.Protocol";
 	static final public String WEB_VIEW_EVENT_PROTOCOL_DEFAULT = "";
+	
+	static final public String ON_RECEIVED_SSL_ERROR_PROCEED_ENABLE_CONFIG_KEY = "BitWebViewClient.OnReceivedSslError.Proceed.Enable";
 	
 	protected WebViewFragment webViewFragment = null;
 	
@@ -41,6 +45,12 @@ public class BitWebViewClient extends WebViewClient {
 		webViewFragment.getActivity().setTitle(Uri.parse(url).getHost());
 		return false;
 	}
+	
+	@Override
+	public void onLoadResource(WebView view, String url) {
+		// TODO Auto-generated method stub
+		super.onLoadResource(view, url);
+	}
 
 	@Override
 	public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
@@ -62,5 +72,14 @@ public class BitWebViewClient extends WebViewClient {
 		webViewFragment.getActivity().setTitle(view.getTitle());
 		CookieSyncManager.getInstance().sync();
 		super.onPageFinished(view, url);
+	}
+
+	@Override
+	public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+		if(Config.getInstance().getBooleanClassProperty(getConfigName(), ON_RECEIVED_SSL_ERROR_PROCEED_ENABLE_CONFIG_KEY, false)) {
+			handler.proceed();
+		} else {	
+			super.onReceivedSslError(view, handler, error);
+		}
 	}
 }

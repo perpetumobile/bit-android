@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.perpetumobile.bit.android.FileUtil;
+import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpRequest;
 import com.perpetumobile.bit.http.HttpResponseDocument;

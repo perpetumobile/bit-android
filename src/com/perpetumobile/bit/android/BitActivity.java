@@ -1,7 +1,7 @@
 package com.perpetumobile.bit.android;
 
+import com.perpetumobile.bit.android.fragments.DrawerFragment;
 import com.perpetumobile.bit.android.fragments.WebViewFragment;
-import com.perpetumobile.bit.android.handlers.DrawerActivityHandler;
 import com.perpetumobile.bit.android.handlers.SearchViewActivityHandler;
 import com.perpetumobile.bit.config.Config;
 
@@ -20,32 +20,23 @@ public class BitActivity extends Activity {
 	static final public String ACTIVITY_EXTRA = "com.perpetumobile.bit.android.ACTIVITY_EXTRA";
 	static final public String ACTIVITY_URL = "com.perpetumobile.bit.android.ACTIVITY_URL";
 	
+	static final public String DRAWER_POSITION = "com.perpetumobile.bit.android.DRAWER_POSITION";
+	
 	static final public String SEARCHABLE_ACTIVITY_START_ENABLED_CONFIG_KEY = "BitActivity.SearchableActivity.Start.Enabled";	
 	static final public boolean SEARCHABLE_ACTIVITY_START_ENABLED_DEFAULT = false;
 	
-	protected DrawerActivityHandler drawer = null;
+	protected DrawerFragment drawerFragment = null;
 	protected SearchViewActivityHandler searchView = null;
 	protected WebViewFragment webViewFragment = null;
 	
 	public boolean isSearchableActivityStartEnabled() {
 		return webViewFragment != null && Config.getInstance().getBooleanProperty(SEARCHABLE_ACTIVITY_START_ENABLED_CONFIG_KEY, SEARCHABLE_ACTIVITY_START_ENABLED_DEFAULT);
 	}
-	
-	protected void setDrawer(Bundle savedInstanceState, DrawerActivityHandler drawerActivityHandler, 
-			int drawerLayoutId, int drawerListId, int drawerListItemId, 
-			int drawerTitleArrayId, int drawerActivityArrayId, int drawerActivityExtraArrayId, int drawerWebViewUrlArrayId,
-			int drawerOpenStrId, int drawerCloseStrId, 
-			int drawerIconId, int drawerShadowId) {
-
-		drawer = drawerActivityHandler;
-		if(drawer != null) {
-			drawer.onCreate(savedInstanceState, 
-				drawerLayoutId, drawerListId, drawerListItemId, 
-				drawerTitleArrayId, drawerActivityArrayId, drawerActivityExtraArrayId, drawerWebViewUrlArrayId,
-				drawerOpenStrId, drawerCloseStrId, 
-				drawerIconId, drawerShadowId);
-		}
-}
+		
+	protected void setDrawerFragment(Bundle savedInstanceState, int drawerFragmentId) {
+		FragmentManager fragmentManager = getFragmentManager();
+		drawerFragment = (DrawerFragment)fragmentManager.findFragmentById(drawerFragmentId);
+	}
 	
 	protected void setSearchView(Menu menu, SearchViewActivityHandler searchViewActivityHandler, int searchViewId) {
 		searchView = searchViewActivityHandler;
@@ -72,14 +63,14 @@ public class BitActivity extends Activity {
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
-		if(drawer != null) drawer.onPostCreate(savedInstanceState);
+		if(drawerFragment != null) drawerFragment.onPostCreate(savedInstanceState);
 	}
 	
 	/* Called whenever we call invalidateOptionsMenu() */
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-		if(drawer != null) drawer.onPrepareOptionsMenu(menu);
+		if(drawerFragment != null) drawerFragment.onPrepareOptionsMenu(menu);
 		if(searchView != null) searchView.onPrepareOptionsMenu(menu);
 		return true;
 	}
@@ -87,7 +78,7 @@ public class BitActivity extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		if(drawer != null) drawer.onConfigurationChanged(newConfig);
+		if(drawerFragment != null) drawerFragment.onConfigurationChanged(newConfig);
 	}
 	
 	@Override
@@ -116,7 +107,7 @@ public class BitActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if(drawer != null && drawer.onOptionsItemSelected(item)) {
+		if(drawerFragment != null && drawerFragment.onOptionsItemSelected(item)) {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

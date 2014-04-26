@@ -4,12 +4,15 @@ import com.perpetumobile.bit.android.BitActivity;
 import com.perpetumobile.bit.android.R;
 import com.perpetumobile.bit.android.clients.BitWebChromeClient;
 import com.perpetumobile.bit.android.clients.BitWebViewClient;
+import com.perpetumobile.bit.android.util.RUtil;
 import com.perpetumobile.bit.config.Config;
+import com.perpetumobile.bit.util.Util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
+import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +23,17 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
-public class WebViewFragment extends Fragment {
-	static final public String CONFIG_NAME = "Default";
+public class WebViewFragment extends BitFragment {
 
+	static final public String LAYOUT_ID_CONFIG_KEY = "WebViewFragment.Layout.Id";
+	static final public String LAYOUT_ID_DEFAULT = "@layout/webview_fragment";
+	
+	static final public String WEB_VIEW_ID_CONFIG_KEY = "WebViewFragment.WebView.Id";
+	static final public String WEB_VIEW_ID_DEFAULT = "@id/web_view";
+	
+	static final public String PROGRESS_BAR_ID_CONFIG_KEY = "WebViewFragment.ProgressBar.Id";
+	static final public String PROGRESS_BAR_ID_DEFAULT = "@id/progress_bar";
+	
 	static final public String PROTOCOL_CONFIG_KEY = "WebViewActivityHandler.Protocol";
 	static final public String HOST_CONFIG_KEY = "WebViewActivityHandler.Host";
 	static final public String URL_EXTRA_CONFIG_KEY = "WebViewActivityHandler.URL.Extra";
@@ -31,28 +42,17 @@ public class WebViewFragment extends Fragment {
 	static final public String HOST_DEFAULT = "www.perpetumobile.com";
 	static final public String URL_EXTRA_DEFAULT = "";
 
-	protected String configName;
+	protected String webViewId;
+	protected String progressBarId;
+	
 	protected ProgressBar progressBar;
 	protected WebView webView;
 
 	public WebViewFragment() {
-		this(CONFIG_NAME);
 	}
 
 	public WebViewFragment(String configName) {
-		this.configName = configName;
-	}
-
-	public String getConfigName() {
-		return configName;
-	}
-
-	protected BitActivity getBitActivity() {
-		Activity a = getActivity();
-		if (a != null && a instanceof BitActivity) {
-			return (BitActivity)a;  
-		}
-		return null;
+		super(configName);
 	}
 	
 	protected WebViewClient createWebViewClient() {
@@ -67,20 +67,43 @@ public class WebViewFragment extends Fragment {
 	// life cycle methods
 	/////////////////////////////////
 	@Override
+	public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+		super.onInflate(activity, attrs, savedInstanceState);		
+		TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.WebViewFragment);
+		webViewId = a.getString(R.styleable.WebViewFragment_web_view_id);
+		progressBarId = a.getString(R.styleable.WebViewFragment_progress_bar_id);
+		a.recycle();
+	}
+	
+	@Override
 	@SuppressLint("SetJavaScriptEnabled")
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (webView != null) {
 			webView.destroy();
 		}
-        View layout = inflater.inflate(R.layout.webview_fragment, container, false);
-        webView = (WebView)layout.findViewById(R.id.web_view);
-        progressBar = (ProgressBar)layout.findViewById(R.id.progress_bar);
+		
+		if(Util.nullOrEmptyString(layoutId)) {
+			layoutId = Config.getInstance().getClassProperty(configName, LAYOUT_ID_CONFIG_KEY, LAYOUT_ID_DEFAULT);
+		}
+		layout = inflater.inflate(RUtil.getResourceId(layoutId), container, false);
+		
+		if(Util.nullOrEmptyString(webViewId)) {
+			webViewId = Config.getInstance().getClassProperty(configName, WEB_VIEW_ID_CONFIG_KEY, WEB_VIEW_ID_DEFAULT);
+		}
+        webView = (WebView)layout.findViewById(RUtil.getResourceId(webViewId));
+        
+        if(Util.nullOrEmptyString(progressBarId)) {
+			progressBarId = Config.getInstance().getClassProperty(configName, PROGRESS_BAR_ID_CONFIG_KEY, PROGRESS_BAR_ID_DEFAULT);
+		}
+        progressBar = (ProgressBar)layout.findViewById(RUtil.getResourceId("id", "progress_bar"));
+        
         if(webView != null) {
 			webView.setWebViewClient(createWebViewClient());
 			webView.setWebChromeClient(createWebChromeClient());
 			WebSettings webSettings = webView.getSettings();
 			webSettings.setJavaScriptEnabled(true);
 		}
+        
         return layout;
 	}
 		

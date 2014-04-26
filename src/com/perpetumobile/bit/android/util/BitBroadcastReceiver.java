@@ -1,4 +1,4 @@
-package com.perpetumobile.bit.android;
+package com.perpetumobile.bit.android.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

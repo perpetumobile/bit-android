@@ -2,7 +2,7 @@ package com.perpetumobile.bit.orm.db;
 
 import java.util.ArrayList;
 
-import com.perpetumobile.bit.android.FileUtil;
+import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.config.ConfigSubscriber;
 import com.perpetumobile.bit.http.BatchHttpRequest;

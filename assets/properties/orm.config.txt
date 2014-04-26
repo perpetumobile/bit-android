@@ -3,3 +3,28 @@ Schema.DBRecord.Table.Name: schema
 Schema.Record.Fields: schema_id auto,\
 version varchar(64)
 
+
+XMLRecord.ParseAll.Enable: true
+JSONRecord.ParseAll.Enable: true
+
+## Drawer JSONRecord configuration
+JSONDrawer.Record.Class: com.perpetumobile.bit.android.fragments.drawer.Drawer
+JSONDrawer.Record.Fields: layout varchar,\
+shadow varchar,\
+icon varchar,\
+open_text varchar,\
+close_text varchar
+
+JSONDrawer.items.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItem
+JSONDrawer.items.Record.Fields: title varchar,\
+layout varchar,\
+activity varchar,\
+activity_extra varchar,\
+webview_url varchar,\
+is_selectable int
+
+JSONDrawer.items.fields.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItemField
+JSONDrawer.items.fields.Record.Fields: id varchar,\
+type varchar,\
+value varchar
+

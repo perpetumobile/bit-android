@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Properties;
 
-import com.perpetumobile.bit.android.FileUtil;
+import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.util.Util;
 
 /**

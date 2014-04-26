@@ -1,0 +1,21 @@
+{ 	
+	"layout": "@layout/drawer_list_item",
+	"shadow": "@drawable/drawer_shadow",
+	"icon": "@drawable/ic_drawer",
+	"open_text": "@string/drawer_open",
+	"close_text": "@string/drawer_close",
+	"items": [
+		{
+			"title": "@string/drawer_title_home",
+			"layout": "@layout/drawer_list_item",
+			"activity": "",
+			"activity_extra": "",
+			"webview_url": "/",
+			"is_selectable": "1",
+			"fields": [
+				{ "id": "@id/drawer_image_1", "type": "image", "value": "@drawable/drawer_item_home" },
+				{ "id": "@id/drawer_text_1", "type": "string", "value": "@string/drawer_title_home" }
+			]
+		}
+	]
+}

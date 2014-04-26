@@ -1,4 +1,4 @@
-package com.perpetumobile.bit.android;
+package com.perpetumobile.bit.android.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.io.Writer;
 import android.content.Context;
 import android.content.res.AssetManager;
 
+import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Util;
 
 /**

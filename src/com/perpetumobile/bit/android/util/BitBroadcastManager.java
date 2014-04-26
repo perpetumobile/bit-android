@@ -1,7 +1,8 @@
-package com.perpetumobile.bit.android;
+package com.perpetumobile.bit.android.util;
 
 import java.util.UUID;
 
+import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Util;
 
 import android.content.BroadcastReceiver;

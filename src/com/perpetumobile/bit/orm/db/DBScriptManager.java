@@ -6,7 +6,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import com.perpetumobile.bit.android.DataSingleton;
-import com.perpetumobile.bit.android.FileUtil;
+import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.orm.record.RecordScriptData;
 import com.perpetumobile.bit.orm.record.StatementLoggerImpl;
 import com.perpetumobile.bit.orm.record.field.Field;
