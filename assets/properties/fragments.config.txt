@@ -1,0 +1,13 @@
+## DrawerFragment default config
+DrawerFragment.Layout.Id: @layout/drawer_fragment
+DrawerFragment.ListView.Id: @id/drawer_list_view
+DrawerFragment.FileName: drawer.json
+
+## WebViewFragment default config
+WebViewFragment.Layout.Id: @layout/webview_fragment
+WebViewFragment.WebView.Id: @id/web_view
+WebViewFragment.ProgressBar.Id: @id/progress_bar
+	
+WebViewFragment.Protocol: http://
+WebViewFragment.Host: www.perpetumobile.com
+WebViewFragment.URL.Extra: 

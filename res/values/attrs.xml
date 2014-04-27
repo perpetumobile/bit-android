@@ -1,15 +1,11 @@
 <resources>
+    <attr name="config_name" format="string" />
+    <attr name="file_name" format="string" />
 	<declare-styleable name="BitFragment">
-		<attr name="config_name" format="string" />
-		<attr name="layout_id" format="string" />
+		<attr name="config_name" />
 	</declare-styleable>
 	<declare-styleable name="DrawerFragment">
-		<attr name="file_name" format="string" />
-		<attr name="list_view_id" format="string" />
-	</declare-styleable>
-	<declare-styleable name="WebViewFragment">
-		<attr name="web_view_id" format="string" />
-		<attr name="progress_bar_id" format="string" />
+		<attr name="file_name" />
 	</declare-styleable>
 </resources>
 

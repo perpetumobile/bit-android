@@ -15,8 +15,6 @@ public class BitFragment extends Fragment {
 	static final public String DEFAULT_CONFIG_NAME = "Default";
 	
 	protected String configName;
-	protected String layoutId;
-	
 	protected View layout; 
 	
 	public BitFragment() {
@@ -50,7 +48,6 @@ public class BitFragment extends Fragment {
 		if(Util.nullOrEmptyString(configName)) {
 			configName = DEFAULT_CONFIG_NAME;
 		}
-		layoutId = a.getString(R.styleable.BitFragment_layout_id);;
 		a.recycle();
 	}	
 }

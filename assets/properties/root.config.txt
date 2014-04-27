@@ -16,6 +16,5 @@ ConfigServerManager.Enable: false
 # include additional configuration files
 ##############################################
 $include: db.config.txt;\
-orm.config.txt
-
-
+orm.config.txt;\
+fragments.config.txt

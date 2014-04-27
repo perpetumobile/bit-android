@@ -4,6 +4,7 @@ import com.perpetumobile.bit.android.fragments.WebViewFragment;
 import com.perpetumobile.bit.config.Config;
 import com.perpetumobile.bit.util.Util;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.view.KeyEvent;
@@ -69,7 +70,8 @@ public class BitWebViewClient extends WebViewClient {
 	@Override
 	public void onPageFinished(WebView view, String url) {
 		webViewFragment.hideProgressBar();
-		webViewFragment.getActivity().setTitle(view.getTitle());
+		Activity activity = webViewFragment.getActivity();
+		if(activity != null && !activity.isDestroyed()) activity.setTitle(view.getTitle());
 		CookieSyncManager.getInstance().sync();
 		super.onPageFinished(view, url);
 	}

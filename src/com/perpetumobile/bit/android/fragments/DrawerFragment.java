@@ -42,7 +42,6 @@ public class DrawerFragment extends BitFragment {
 	static final public String LIST_VIEW_ID_DEFAULT = "@id/drawer_list_view";
 	
 	protected String fileName;
-	protected String listViewId;
 	
 	protected DrawerLayout parentLayout;
 	
@@ -82,7 +81,6 @@ public class DrawerFragment extends BitFragment {
 		super.onInflate(activity, attrs, savedInstanceState);		
 		TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.DrawerFragment);
 		fileName = a.getString(R.styleable.DrawerFragment_file_name);
-		listViewId = a.getString(R.styleable.DrawerFragment_list_view_id);
 		a.recycle();
 	}
 	
@@ -90,14 +88,10 @@ public class DrawerFragment extends BitFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {	
 		Activity activity = getActivity();
 		
-		if(Util.nullOrEmptyString(layoutId)) {
-			layoutId = Config.getInstance().getClassProperty(configName, LAYOUT_ID_CONFIG_KEY, LAYOUT_ID_DEFAULT);
-		}
+		String layoutId = Config.getInstance().getClassProperty(configName, LAYOUT_ID_CONFIG_KEY, LAYOUT_ID_DEFAULT);
 		layout = inflater.inflate(RUtil.getResourceId(layoutId), container, false);
         
-		if(Util.nullOrEmptyString(listViewId)) {
-			listViewId = Config.getInstance().getClassProperty(configName, LIST_VIEW_ID_CONFIG_KEY, LIST_VIEW_ID_DEFAULT);
-		}
+		String listViewId = Config.getInstance().getClassProperty(configName, LIST_VIEW_ID_CONFIG_KEY, LIST_VIEW_ID_DEFAULT);
 		drawerListView = (ListView)layout.findViewById(RUtil.getResourceId(listViewId));
 		
 		title = drawerTitle = activity.getTitle();
