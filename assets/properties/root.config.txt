@@ -10,6 +10,8 @@ BitService.ThreadPoolManager.Active.Max: 2
 
 BitActivity.SearchableActivity.Start.Enabled: false
 
+BitWebViewClient.OnReceivedSslError.Proceed.Enable: false
+
 ConfigServerManager.Enable: false
  
 ##############################################
