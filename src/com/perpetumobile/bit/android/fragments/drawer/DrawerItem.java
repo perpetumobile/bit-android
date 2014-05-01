@@ -4,12 +4,14 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.View;
 
 import com.perpetumobile.bit.android.BitActivity;
 import com.perpetumobile.bit.android.util.RUtil;
 import com.perpetumobile.bit.orm.json.JSONRecord;
 import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.Util;
+
 
 public class DrawerItem extends JSONRecord {
 	static private Logger logger = new Logger(DrawerItem.class);
@@ -72,5 +74,12 @@ public class DrawerItem extends JSONRecord {
     		return (ArrayList<DrawerItemField>)list; 
     	}	
 		return null;
+	}
+	
+	public void setView(View view) {
+		ArrayList<DrawerItemField> fields = getItemFields();
+		for(DrawerItemField f : fields) {
+			f.setView(view);
+		}
 	}
 }

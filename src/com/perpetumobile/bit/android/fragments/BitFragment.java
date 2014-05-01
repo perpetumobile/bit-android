@@ -15,7 +15,7 @@ public class BitFragment extends Fragment {
 	static final public String DEFAULT_CONFIG_NAME = "Default";
 	
 	protected String configName;
-	protected View layout; 
+	protected View layout;
 	
 	public BitFragment() {
 	}
@@ -49,5 +49,11 @@ public class BitFragment extends Fragment {
 			configName = DEFAULT_CONFIG_NAME;
 		}
 		a.recycle();
-	}	
+	}
+	
+	@Override
+	public void onDestroyView() {
+		layout = null;
+		super.onDestroyView();
+	}
 }

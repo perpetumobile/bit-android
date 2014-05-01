@@ -31,8 +31,7 @@ public class RUtil {
 			Field f = srcClass.getDeclaredField(fieldName);
 			result = f.getInt(srcClass.newInstance());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("RUtil.getint exception.", e);
 		}
 		return result;
 	}

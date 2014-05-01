@@ -98,10 +98,11 @@ public class WebViewFragment extends BitFragment {
 
 	@Override
 	public void onDestroyView() {
-		if (webView != null) {
+		if(webView != null) {
 			webView.destroy();
 			webView = null;
 		}
+		progressBar = null;
 		super.onDestroyView();
 	}
 

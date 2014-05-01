@@ -51,20 +51,21 @@ public class Drawer extends JSONRecord {
 		return null;
 	}
 	
+	public DrawerItem getDrawerItem(String title) {
+		ArrayList<DrawerItem> list = getDrawerItems();
+		for(DrawerItem item : list) {
+			if(title.equals(item.getTitle())) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
 	public boolean startActivity(Activity activity, int position) {
 		DrawerItem item = getDrawerItem(position);
 		if(item !=null) {
 			return item.startActivity(activity, position);
 		}
 		return false;
-	}
-	
-	public ArrayList<String> getTitles() {
-		ArrayList<String> result = new ArrayList<String>();
-		ArrayList<DrawerItem> list = getDrawerItems();
-		for(DrawerItem item : list) {
-			result.add(item.getTitle());
-		}
-		return result;
 	}
 }

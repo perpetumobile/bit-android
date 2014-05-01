@@ -1,8 +1,12 @@
 package com.perpetumobile.bit.android.fragments;
 
+import java.io.IOException;
+import java.io.StringReader;
+
 import com.perpetumobile.bit.android.BitActivity;
 import com.perpetumobile.bit.android.R;
 import com.perpetumobile.bit.android.fragments.drawer.Drawer;
+import com.perpetumobile.bit.android.fragments.drawer.DrawerArrayAdapter;
 import com.perpetumobile.bit.android.fragments.drawer.DrawerItem;
 import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.android.util.RUtil;
@@ -16,6 +20,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -25,9 +32,49 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.WrapperListAdapter;
+
+
+enum DrawerFragmentTaskAction {
+	ADD_DRAWER_ITEM,
+	REMOVE_DRAWER_ITEM,
+	ADD_HEADER_VIEW,
+	REMOVE_HEADER_VIEW,
+	ADD_FOOTER_VIEW,
+	REMOVE_FOOTER_VIEW;
+}
+
+class DrawerFragmentTask {
+	
+	DrawerFragmentTaskAction action;
+	
+	DrawerItem item;
+	
+	// Header/Footer fields
+	View view;
+	Object data;
+	boolean isSelectable = true;
+	
+	DrawerFragmentTask(DrawerFragmentTaskAction action, DrawerItem item) {
+		this.action = action;
+		this.item = item;
+	}
+	
+	DrawerFragmentTask(DrawerFragmentTaskAction action, View view) {
+		this.action = action;
+		this.view = view;
+	}
+	
+	DrawerFragmentTask(DrawerFragmentTaskAction action, View view, Object data, boolean isSelectable) {
+		this.action = action;
+		this.view = view;
+		this.data = data;
+		this.isSelectable = isSelectable;
+	}
+}
 
 public class DrawerFragment extends BitFragment {
 	static private Logger logger = new Logger(DrawerFragment.class);
@@ -43,6 +90,7 @@ public class DrawerFragment extends BitFragment {
 	
 	protected String fileName;
 	
+	protected Handler handler;
 	protected DrawerLayout parentLayout;
 	
 	protected ListView drawerListView;
@@ -73,6 +121,41 @@ public class DrawerFragment extends BitFragment {
 		return result;
 	}
 	
+	static public DrawerItem createDrawerItem(String drawerItemJSON) {
+		DrawerItem result = null;
+		Drawer drawer = null;
+		try {
+			String drawerJSON = "{\"items\": [\n" + drawerItemJSON + "\n]}";
+			drawer = (Drawer)JSONParserManager.getInstance().parseImpl(new StringReader(drawerJSON), "JSONDrawer");
+			result = drawer.getDrawerItem(0);
+		} catch (Exception e) {
+			logger.error("DrawerFragment.readDrawerItemImpl exception.", e);
+		}
+		return result;
+	}
+	
+	static public DrawerItem readDrawerItem(String drawerItemFileName) {
+		String drawerItemJSON = null;
+		try {
+			drawerItemJSON = FileUtil.readAssetFile("properties/"+drawerItemFileName).toString();
+		} catch (IOException e) {
+			logger.error("DrawerFragment.readDrawerItem exception.", e);
+		}
+		return createDrawerItem(drawerItemJSON);
+	}
+	
+	public DrawerItem getDrawerItem(String title) {
+		return drawer.getDrawerItem(title);
+	}
+	
+	protected DrawerArrayAdapter getDrawerArrayAdapter() {
+		Adapter a = drawerListView.getAdapter();
+		if(a instanceof WrapperListAdapter) {
+			return (DrawerArrayAdapter)((WrapperListAdapter)a).getWrappedAdapter();
+		}
+		return (DrawerArrayAdapter)a;
+	}
+	
 	/////////////////////////////////
 	// life cycle methods
 	/////////////////////////////////
@@ -84,6 +167,39 @@ public class DrawerFragment extends BitFragment {
 		a.recycle();
 	}
 	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+		
+		handler = new Handler(Looper.getMainLooper()) {
+			@Override
+			public void handleMessage(Message msg) {
+				DrawerFragmentTask task = (DrawerFragmentTask)msg.obj; 
+				switch(task.action) {
+				case ADD_DRAWER_ITEM:
+					getDrawerArrayAdapter().add(task.item);
+					break;
+				case REMOVE_DRAWER_ITEM:
+					getDrawerArrayAdapter().remove(task.item);
+					break;
+				case ADD_HEADER_VIEW:
+					drawerListView.addHeaderView(task.view, task.data, task.isSelectable);
+					break;
+				case REMOVE_HEADER_VIEW:
+					drawerListView.removeHeaderView(task.view);
+					break;
+				case ADD_FOOTER_VIEW:
+					drawerListView.removeFooterView(task.view);
+					break;
+				case REMOVE_FOOTER_VIEW:
+					break;
+			}
+			}
+			
+		};
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {	
 		Activity activity = getActivity();
@@ -97,9 +213,9 @@ public class DrawerFragment extends BitFragment {
 		title = drawerTitle = activity.getTitle();
 		
 		drawer = readDrawer();
-				
+		
 		// set up the drawer's list view with items and click listener
-		drawerListView.setAdapter(new ArrayAdapter<String>(activity, drawer.getLayoutId(), drawer.getTitles()));
+		drawerListView.setAdapter(new DrawerArrayAdapter(activity, drawer.getDrawerItems()));
 		drawerListView.setOnItemClickListener(new DrawerItemClickListener());
 		
 		return layout;
@@ -114,10 +230,6 @@ public class DrawerFragment extends BitFragment {
 		parentLayout = (DrawerLayout)activity.findViewById(RUtil.getResourceId("id", "drawer_layout"));
 		// set a custom shadow that overlays the main content when the drawer opens
 		parentLayout.setDrawerShadow(drawer.getShadowId(), GravityCompat.START);
-
-		// enable ActionBar app icon to behave as action to toggle nav drawer
-		activity.getActionBar().setDisplayHomeAsUpEnabled(true);
-		activity.getActionBar().setHomeButtonEnabled(true);
 
 		// ActionBarDrawerToggle ties together the the proper interactions
 		// between the sliding drawer and the action bar app icon
@@ -141,10 +253,18 @@ public class DrawerFragment extends BitFragment {
 		};
 		parentLayout.setDrawerListener(drawerToggle);	
 		
+		// enable ActionBar app icon to behave as action to toggle nav drawer
+		activity.getActionBar().setDisplayHomeAsUpEnabled(true);
+		activity.getActionBar().setHomeButtonEnabled(true);
+		
+		// If drawer starts new activity, position will be passed as an intent extra
+		// mark the drawer using the position
 		Intent intent = activity.getIntent();
 		if(intent != null) {
-			int position = intent.getIntExtra(BitActivity.DRAWER_POSITION, 0);
-			markItem(position);
+			int position = intent.getIntExtra(BitActivity.DRAWER_POSITION, -1);
+			if(position != -1) {
+				markItem(position);
+			}
 		}
 	}
 	
@@ -182,54 +302,89 @@ public class DrawerFragment extends BitFragment {
 		return false;
 	}
 
+	@Override
+	public void onDestroyView() {
+		parentLayout.setDrawerListener(null);
+		drawerListView.setAdapter(null);
+		parentLayout = null;
+		drawerListView = null;
+		super.onDestroyView();
+	}
+
 	/////////////////////////////////
 	// list view methods
 	/////////////////////////////////
-	
-
-
-	/////////////////////////////////
-	// bit protocol/activity methods
-	/////////////////////////////////
-	
-	public void setTitle(CharSequence title) {
-		this.title = title;
-		getActivity().setTitle(title);
+	public void addHeaderView(View v) {
+		addHeaderView(v, null, true);
 	}
 	
-	protected void markItem(int position) {
-		DrawerItem item = drawer.getDrawerItem(position);
-		if(item != null) {
-			// update selected item and title, then close the drawer
-			drawerListView.setItemChecked(position, true);
-			setTitle(item.getTitle());
-			parentLayout.closeDrawer(layout);
-		}
+	public void addHeaderView(View v, Object data, boolean isSelectable) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.ADD_HEADER_VIEW, v, data, isSelectable));
+		msg.sendToTarget();
 	}
 	
-	protected void selectItem(int position) throws ClassNotFoundException {
-		DrawerItem item = drawer.getDrawerItem(position);
-		if(item != null) {
-			if(!item.startActivity(getActivity(), position)) {
-				BitActivity ba = getBitActivity();
-				if(ba != null) {
-					ba.setQuery("");
-					ba.loadUrl(item.getWebViewUrl());
-				}
-			}
-			markItem(position);
-		}
+	public void removeHeaderView(View v) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.REMOVE_HEADER_VIEW, v));
+		msg.sendToTarget();
+	}
+	
+	public void addFooterView(View v) {
+		addFooterView(v, null, true);
+	}
+	
+	public void addFooterView(View v, Object data, boolean isSelectable) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.ADD_FOOTER_VIEW, v, data, isSelectable));
+		msg.sendToTarget();
+	}
+	
+	public void removeFooterView(View v) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.REMOVE_FOOTER_VIEW, v));
+		msg.sendToTarget();
+	}
+	
+	public void addDrawerItem(DrawerItem item) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.ADD_DRAWER_ITEM, item));
+		msg.sendToTarget();
+	}
+	
+	public void removeDrawerItem(DrawerItem item) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.REMOVE_DRAWER_ITEM, item));
+		msg.sendToTarget();
 	}
 
 	/* The click listener for ListView in the navigation drawer */
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			try {
-				selectItem(position);
-			} catch (ClassNotFoundException e) {
-				logger.error("DrawerItemClickListener.onItemClick exception." , e);
+			DrawerItem item = (DrawerItem)parent.getAdapter().getItem(position);
+			if(item != null) {
+				if(!item.startActivity(getActivity(), position)) {
+					BitActivity ba = getBitActivity();
+					if(ba != null) {
+						ba.setQuery("");
+						ba.loadUrl(item.getWebViewUrl());
+					}
+				}
+				markItem(position);
 			}
+		}
+	}
+	
+	/////////////////////////////////
+	// bit protocol/activity methods
+	/////////////////////////////////
+	public void setTitle(CharSequence title) {
+		this.title = title;
+		getActivity().setTitle(title);
+	}
+	
+	protected void markItem(int position) {
+		DrawerItem item = (DrawerItem)drawerListView.getAdapter().getItem(position);
+		if(item != null) {
+			// update selected item and title, then close the drawer
+			drawerListView.setItemChecked(position, true);
+			setTitle(item.getTitle());
+			parentLayout.closeDrawer(layout);
 		}
 	}
 }

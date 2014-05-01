@@ -8,7 +8,7 @@
         android:id="@+id/drawer_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#111"
+        android:background="#88000000"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp" />   
