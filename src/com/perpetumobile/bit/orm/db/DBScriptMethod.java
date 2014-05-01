@@ -28,6 +28,6 @@ public enum DBScriptMethod {
 	}
 
 	static public DBScriptMethod get(String type) { 
-		return map.get(type); 
+		return map.get(type.toUpperCase()); 
 	}
 }

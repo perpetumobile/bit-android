@@ -28,6 +28,6 @@ public enum HttpMethod {
 	}
 
 	static public HttpMethod get(String type) { 
-		return map.get(type); 
+		return map.get(type.toUpperCase()); 
 	}
 }

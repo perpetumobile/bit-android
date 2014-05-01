@@ -32,6 +32,6 @@ public enum DBStatementMethod {
 	}
 
 	static public DBStatementMethod get(String type) { 
-		return map.get(type); 
+		return map.get(type.toUpperCase()); 
 	}
 }
