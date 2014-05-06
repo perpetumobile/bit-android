@@ -1,5 +1,7 @@
 <resources>
 
     <string name="app_name">bit-android</string>
+    
+    <string name="alt_text_drawer_header_image">Drawer Header Image</string>
 
 </resources>
