@@ -1,5 +1,6 @@
 package com.perpetumobile.bit.http;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.net.CookieHandler;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.webkit.CookieSyncManager;
 
 import com.perpetumobile.bit.android.DataSingleton;
@@ -37,6 +40,7 @@ public class HttpManager {
 		int code = c.getResponseCode();
 		result.setStatusCode(code);
 		result.setContentLenght(c.getContentLength());
+		result.setHeaderFields(c.getHeaderFields());
 		
 		InputStream stream = null;
 		if(code < 400) {
@@ -60,6 +64,26 @@ public class HttpManager {
 		// sync cookies
 		CookieSyncManager.getInstance().sync();
 	}
+	
+	protected void readImageResponse(HttpURLConnection c, HttpResponseDocument result) throws IOException {	
+		int code = c.getResponseCode();
+		if(code != 200) {
+			readResponse(c, result);
+		} else {
+			result.setStatusCode(code);
+			result.setContentLenght(c.getContentLength());
+			result.setHeaderFields(c.getHeaderFields());
+			
+			BufferedInputStream in = new BufferedInputStream(c.getInputStream());
+			Bitmap bitmap = BitmapFactory.decodeStream(in);		
+			result.setBitmap(bitmap);
+			
+			in.close();
+			
+			// sync cookies
+			CookieSyncManager.getInstance().sync();
+		}
+	}
 
 	protected HttpResponseDocument getImpl(HttpRequest httpRequest) {
 		HttpResponseDocument result = new HttpResponseDocument(httpRequest.getUrl());
@@ -68,8 +92,13 @@ public class HttpManager {
 			URL u = new URL(httpRequest.getUrl());
 			c = (HttpURLConnection) u.openConnection();
 			httpRequest.prepareConnection(c);
+			
 			// read response
-			readResponse(c, result);
+			if(httpRequest.method == HttpMethod.GET_IMAGE) { 
+				readImageResponse(c, result);
+			} else {
+				readResponse(c, result);
+			}
 		} catch (Exception e) {
 			logger.error("HttpManager.getImpl exception", e);
 		} finally {
@@ -94,8 +123,13 @@ public class HttpManager {
 				out.write(httpRequest.getContent().getBytes());
 				out.close();
 			}
+			
 			// read response
-			readResponse(c, result);
+			if(httpRequest.method == HttpMethod.POST_IMAGE) { 
+				readImageResponse(c, result);
+			} else {
+				readResponse(c, result);
+			}
 		} catch (Exception e) {
 			logger.error("HttpManager.postImpl exception", e);
 		} finally {
@@ -106,10 +140,19 @@ public class HttpManager {
 	
 	public HttpResponseDocument executeImpl(HttpRequest httpRequest) {
 		HttpResponseDocument result = null;
-		if(httpRequest.method == HttpMethod.GET) {
-			result = getImpl(httpRequest);
-		} else if(httpRequest.method == HttpMethod.POST) {
-			result = postImpl(httpRequest);
+		switch(httpRequest.method) {
+			case GET:
+				result = getImpl(httpRequest);
+				break;
+			case POST:
+				result = postImpl(httpRequest);
+				break;
+			case GET_IMAGE:
+				result = getImpl(httpRequest);
+				break;
+			case POST_IMAGE:
+				result = postImpl(httpRequest);
+				break;
 		}
 		return result;
 	}

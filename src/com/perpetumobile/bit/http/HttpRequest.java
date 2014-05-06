@@ -19,6 +19,11 @@ public class HttpRequest {
 		this.url = url;
 	}
 	
+	public HttpRequest(HttpMethod method, String url) {
+		this.url = url;
+		this.method = method;
+	}
+	
 	public HttpRequest(HttpMethod method, String url, String content) {
 		this.url = url;
 		this.method = method;

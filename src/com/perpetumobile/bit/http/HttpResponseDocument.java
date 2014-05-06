@@ -1,5 +1,10 @@
 package com.perpetumobile.bit.http;
 
+import java.util.List;
+import java.util.Map;
+
+import android.graphics.Bitmap;
+
 /**
  * @author Zoran Dukic
  *
@@ -9,7 +14,9 @@ public class HttpResponseDocument {
 	protected String sourceUrl = null;
 	protected String destinationUrl = null;
 	protected int statusCode = -1;
+	protected Map<String, List<String>> headerFields = null; 
 	protected String pageSource = null;
+	protected Bitmap bitmap = null;
 	protected long contentLenght = -1;
 	
 	public HttpResponseDocument(String url) {
@@ -20,7 +27,9 @@ public class HttpResponseDocument {
 	protected void reset() {
 		// reset all generated fields
 		statusCode = -1;
+		headerFields = null;
 		pageSource = null;
+		bitmap = null;
 		contentLenght = -1;
 	}
 	
@@ -60,6 +69,14 @@ public class HttpResponseDocument {
 		this.statusCode = statusCode;
 	}
 	
+	public Map<String, List<String>> getHeaderFields() {
+		return headerFields;
+	}
+
+	public void setHeaderFields(Map<String, List<String>> headerFields) {
+		this.headerFields = headerFields;
+	}
+
 	/**
 	 * @return Returns the pageSource.
 	 */
@@ -72,6 +89,14 @@ public class HttpResponseDocument {
 	 */
 	public void setPageSource(String pageSource) {
 		this.pageSource = pageSource;
+	}
+	
+	public Bitmap getBitmap() {
+		return bitmap;
+	}
+
+	public void setBitmap(Bitmap bitmap) {
+		this.bitmap = bitmap;
 	}
 
 	/**
