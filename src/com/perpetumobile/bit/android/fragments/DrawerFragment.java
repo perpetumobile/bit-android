@@ -2,6 +2,7 @@ package com.perpetumobile.bit.android.fragments;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import com.perpetumobile.bit.android.BitActivity;
 import com.perpetumobile.bit.android.R;
@@ -41,6 +42,8 @@ import android.widget.WrapperListAdapter;
 enum DrawerFragmentTaskAction {
 	ADD_DRAWER_ITEM,
 	REMOVE_DRAWER_ITEM,
+	ADD_DRAWER_ITEMS,
+	REMOVE_DRAWER_ITEMS,
 	ADD_HEADER_VIEW,
 	REMOVE_HEADER_VIEW,
 	ADD_FOOTER_VIEW,
@@ -53,6 +56,8 @@ class DrawerFragmentTask {
 	
 	DrawerItem item;
 	
+	ArrayList<DrawerItem> items;
+	
 	// Header/Footer fields
 	View view;
 	Object data;
@@ -61,6 +66,11 @@ class DrawerFragmentTask {
 	DrawerFragmentTask(DrawerFragmentTaskAction action, DrawerItem item) {
 		this.action = action;
 		this.item = item;
+	}
+	
+	DrawerFragmentTask(DrawerFragmentTaskAction action, ArrayList<DrawerItem> items) {
+		this.action = action;
+		this.items = items;
 	}
 	
 	DrawerFragmentTask(DrawerFragmentTaskAction action, View view) {
@@ -144,8 +154,12 @@ public class DrawerFragment extends BitFragment {
 		return createDrawerItem(drawerItemJSON);
 	}
 	
-	public DrawerItem getDrawerItem(String title) {
-		return drawer.getDrawerItem(title);
+	public DrawerItem getDrawerItem(String id) {
+		return drawer.getDrawerItem(id);
+	}
+	
+	public ArrayList<DrawerItem> getDrawerItems(String idStartsWith) {
+		return drawer.getDrawerItems(idStartsWith);
 	}
 	
 	protected DrawerArrayAdapter getDrawerArrayAdapter() {
@@ -183,6 +197,16 @@ public class DrawerFragment extends BitFragment {
 				case REMOVE_DRAWER_ITEM:
 					getDrawerArrayAdapter().remove(task.item);
 					break;
+				case ADD_DRAWER_ITEMS:
+					for(DrawerItem item : task.items) { 
+						getDrawerArrayAdapter().add(item);
+					}
+					break;
+				case REMOVE_DRAWER_ITEMS:
+					for(DrawerItem item : task.items) {
+						getDrawerArrayAdapter().remove(item);
+					}
+					break;	
 				case ADD_HEADER_VIEW:
 					drawerListView.addHeaderView(task.view, task.data, task.isSelectable);
 					break;
@@ -194,9 +218,8 @@ public class DrawerFragment extends BitFragment {
 					break;
 				case REMOVE_FOOTER_VIEW:
 					break;
+				}
 			}
-			}
-			
 		};
 	}
 
@@ -349,6 +372,16 @@ public class DrawerFragment extends BitFragment {
 	
 	public void removeDrawerItem(DrawerItem item) {
 		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.REMOVE_DRAWER_ITEM, item));
+		msg.sendToTarget();
+	}
+	
+	public void addDrawerItems(ArrayList<DrawerItem> items) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.ADD_DRAWER_ITEMS, items));
+		msg.sendToTarget();
+	}
+	
+	public void removeDrawerItems(ArrayList<DrawerItem> items) {
+		Message msg = handler.obtainMessage(0, new DrawerFragmentTask(DrawerFragmentTaskAction.REMOVE_DRAWER_ITEMS, items));
 		msg.sendToTarget();
 	}
 

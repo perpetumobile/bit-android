@@ -51,14 +51,26 @@ public class Drawer extends JSONRecord {
 		return null;
 	}
 	
-	public DrawerItem getDrawerItem(String title) {
+	public DrawerItem getDrawerItem(String id) {
 		ArrayList<DrawerItem> list = getDrawerItems();
 		for(DrawerItem item : list) {
-			if(title.equals(item.getTitle())) {
+			if(id.equals(item.getId())) {
 				return item;
 			}
 		}
 		return null;
+	}
+	
+	public ArrayList<DrawerItem> getDrawerItems(String idStartsWith) {
+		ArrayList<DrawerItem> result = new ArrayList<DrawerItem>();
+		ArrayList<DrawerItem> list = getDrawerItems();
+		for(DrawerItem item : list) {
+			String itemId = item.getId(); 
+			if(itemId != null && itemId.startsWith(idStartsWith)) {
+				result.add(item);
+			}
+		}
+		return result;
 	}
 	
 	public boolean startActivity(Activity activity, int position) {

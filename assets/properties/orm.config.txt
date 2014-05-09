@@ -16,7 +16,8 @@ open_text varchar,\
 close_text varchar
 
 JSONDrawer.items.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItem
-JSONDrawer.items.Record.Fields: title varchar,\
+JSONDrawer.items.Record.Fields: id varchar,\
+title varchar,\
 layout varchar,\
 activity varchar,\
 activity_extra varchar,\

@@ -19,6 +19,10 @@ public class DrawerItem extends JSONRecord {
 	public DrawerItem() {
 	}
 
+	public String getId() {
+		return getFieldValue("id");
+	}
+	
 	public String getTitle() {
 		String title = getFieldValue("title");
 		if(title != null && title.startsWith("@")) {

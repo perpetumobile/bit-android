@@ -6,6 +6,7 @@
 	"close_text": "@string/drawer_close",
 	"items": [
 		{
+			"id": "home",
 			"title": "@string/drawer_title_home",
 			"layout": "@layout/drawer_list_item",
 			"activity": "",
