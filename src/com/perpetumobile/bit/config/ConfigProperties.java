@@ -19,7 +19,7 @@ public class ConfigProperties {
 	final static public String CONFIG_DELIMITER_DEFAULT = ";";
 	final static public String CONFIG_KEY_INCLUDE = "$include";
 	
-	private Properties properties = null;
+	protected Properties properties = null;
 	
 	public ConfigProperties() {
 		properties = new Properties();

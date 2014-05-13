@@ -1,12 +1,15 @@
 package com.perpetumobile.bit.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.TimerTask;
 
 import android.content.Context;
 
 import com.perpetumobile.bit.android.DataSingleton;
+import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.TimerManager;
 import com.perpetumobile.bit.util.Util;
 
@@ -18,6 +21,8 @@ import com.perpetumobile.bit.util.Util;
 final public class Config {
 	static private Config instance = new Config();
 	static public Config getInstance() { return instance; }
+	
+	static private Logger logger = new Logger(Config.class);
 	
 	final static public String CONFIG_PROPERTIES_DIRECTORY_PATH = "properties";
 	final static public String CONFIG_PROPERTIES_VERSION_DIRECTORY_PATH() { return CONFIG_PROPERTIES_DIRECTORY_PATH + "/" + DataSingleton.getInstance().getAppVersion(); }
@@ -58,13 +63,15 @@ final public class Config {
 				tmpProperties = new AssetConfigProperties(CONFIG_ROOT_FILE);
 			} catch (ConfigPropertiesException e2) {
 				tmpProperties = new AssetConfigProperties();
+				logger.error("Config file '" + CONFIG_ROOT_FILE	+ "' not found.");
 			}
 		}
 		try {
 			// load local properties if available
 			ConfigProperties localProperties = new LocalConfigProperties(CONFIG_LOCAL_FILE);
 			tmpProperties.putAll(localProperties);
-		} catch (ConfigPropertiesException e) {	
+		} catch (ConfigPropertiesException e) {
+			logger.error("Config.reset exception", e);
 		} 
 		
 		// is this thread safe?
@@ -75,6 +82,26 @@ final public class Config {
 		}
 		
 		publish();
+	}
+	
+	public Properties getLocalProperties() {
+		Properties result = null;
+		try {
+			ConfigProperties localProperties = new LocalConfigProperties(CONFIG_LOCAL_FILE);
+			result = localProperties.properties;
+		} catch (ConfigPropertiesException e) {	
+			logger.error("Config.getLocalProperties exception", e);
+		}
+		return result;
+	}
+	
+	public void setLocalProperties(Properties properties) {
+		try {
+			LocalConfigProperties.store(properties);
+		} catch (IOException e) {
+			logger.error("Config.storeLocalProperties exception", e);
+		}
+		reset(false);
 	}
 	
 	protected void cleanConfigPropertiesDirectory() {
