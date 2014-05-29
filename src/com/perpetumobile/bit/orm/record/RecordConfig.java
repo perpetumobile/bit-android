@@ -18,6 +18,8 @@ import com.perpetumobile.bit.util.Util;
  */
 abstract public class RecordConfig {
 	
+	public static final String CONFIG_NAME_DELIMITER = ".";
+	
 	public static final String CLASS_CONFIG_KEY = ".Record.Class";
 	
 	public static final String CONNECTION_CONFIG_KEY_CONFIG_KEY = ".Record.Connection.Config.Key";

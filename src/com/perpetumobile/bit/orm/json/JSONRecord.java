@@ -1,9 +1,6 @@
 package com.perpetumobile.bit.orm.json;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import com.perpetumobile.bit.orm.record.Record;
 import com.perpetumobile.bit.orm.record.RecordConnection;
@@ -18,8 +15,6 @@ import com.perpetumobile.bit.orm.record.field.FieldConfig;
  * @author Zoran Dukic
  */
 public class JSONRecord extends Record {
-	
-	HashMap<String, ArrayList<JSONRecord>> map = new HashMap<String, ArrayList<JSONRecord>>();
 
 	public JSONRecord() {
 	}
@@ -50,12 +45,13 @@ public class JSONRecord extends Record {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void aggregate(JSONRecord rec) {
 		String key = rec.getConfigName();
-		ArrayList<JSONRecord> list = map.get(key);
+		ArrayList<JSONRecord> list = (ArrayList<JSONRecord>)listRelationshipMap.get(key);
 		if(list == null) {
 			list = new ArrayList<JSONRecord>();
-			map.put(key, list);
+			listRelationshipMap.put(key, list);
 		}
 		list.add(rec);
 	}
@@ -67,19 +63,20 @@ public class JSONRecord extends Record {
 		getJSONRecords(buf.toString(), result);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void getJSONRecords(String configName, ArrayList<JSONRecord> result) {
 		if(configName.startsWith(getConfigName())) {
 			int index = configName.indexOf(JSONRecordConfig.CONFIG_NAME_DELIMITER, getConfigName().length()+1);
 			if(index != -1) {
 				String key = configName.substring(0, index);
-				ArrayList<JSONRecord> list = map.get(key);
+				ArrayList<JSONRecord> list = (ArrayList<JSONRecord>)listRelationshipMap.get(key);
 				if(list != null) {
 					for(JSONRecord rec : list) {
 						rec.getJSONRecords(configName, result);
 					}
 				}
 			} else {
-				ArrayList<JSONRecord> list = map.get(configName);
+				ArrayList<JSONRecord> list = (ArrayList<JSONRecord>)listRelationshipMap.get(configName);
 				if(list != null) {
 					result.addAll(list);
 				}
@@ -102,17 +99,5 @@ public class JSONRecord extends Record {
 	throws Exception {
 		// lazy relationship loading not supported for JSONRecord
 		return null;
-	}
-	
-	public void print(boolean printLabel) {
-		super.print(printLabel);
-				
-		Set<Entry<String, ArrayList<JSONRecord>>> set = map.entrySet();
-		for(Entry<String, ArrayList<JSONRecord>> e : set) {
-			ArrayList<JSONRecord> list = e.getValue();
-			for(JSONRecord rec : list) {
-				rec.print(printLabel);
-			}
-		}
 	}
 }

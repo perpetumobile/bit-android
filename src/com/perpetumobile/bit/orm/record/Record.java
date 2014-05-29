@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import com.perpetumobile.bit.orm.record.RelationshipConfig.RelationshipType;
 import com.perpetumobile.bit.orm.record.exception.FieldNotConfiguredException;
@@ -28,8 +30,8 @@ abstract public class Record implements Option {
 	private HashMap<String, Field> fieldMap = null;
 	
 	protected HashMap<String, Record> recordRelationshipMap = new HashMap<String, Record>();
-	protected HashMap<String, ArrayList<Record>> listRelationshipMap = new HashMap<String, ArrayList<Record>>();
-	protected HashMap<String, HashMap<String, Record>> mapRelationshipMap = new HashMap<String, HashMap<String, Record>>();
+	protected HashMap<String, ArrayList<? extends Record>> listRelationshipMap = new HashMap<String, ArrayList<? extends Record>>();
+	protected HashMap<String, HashMap<String, ? extends Record>> mapRelationshipMap = new HashMap<String, HashMap<String, ? extends Record>>();
 	
 	public Record() {
 	}
@@ -82,6 +84,7 @@ abstract public class Record implements Option {
 		return (config.getKeyFieldName() != null ? getField(config.getKeyFieldName()) : null);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void addRelationshipRecord(String configName, Record rec) {
 		RelationshipConfig rc = config.getRelationshipConfig(configName);
 		
@@ -90,7 +93,7 @@ abstract public class Record implements Option {
 			recordRelationshipMap.put(configName, rec);
 			break;
 		case List:
-			ArrayList<Record> list = listRelationshipMap.get(configName);
+			ArrayList<Record> list = (ArrayList<Record>)listRelationshipMap.get(configName);
 			if(list == null) {
 				list = new ArrayList<Record>();
 				listRelationshipMap.put(configName, list);
@@ -102,7 +105,7 @@ abstract public class Record implements Option {
 			if(keyField == null) {
 				throw new KeyFieldNotConfiguredException("Record Config Name: " + configName);
 			}
-			HashMap<String, Record> map = mapRelationshipMap.get(configName);
+			HashMap<String, Record> map = (HashMap<String, Record>)mapRelationshipMap.get(configName);
 			if(map == null) {
 				map = new HashMap<String, Record>();
 				mapRelationshipMap.put(configName, map);
@@ -249,7 +252,6 @@ abstract public class Record implements Option {
 	 * @param connection
 	 * @param stmtLogger
 	 */
-	@SuppressWarnings("unchecked")
 	public HashMap<String, ? extends Record> getRelationshipRecordMap(String configName, RecordConnection<?> connection, StatementLogger stmtLogger) {
 		RelationshipConfig rc = config.getRelationshipConfig(configName);
 		if(rc.getRelationshipType() != RelationshipType.Map) {
@@ -284,7 +286,7 @@ abstract public class Record implements Option {
 			if(result == null) {
 				result = new HashMap<String, Record>();
 			}
-			mapRelationshipMap.put(configName, (HashMap<String, Record>)result);
+			mapRelationshipMap.put(configName, result);
 		}
 		return result;
 	}
@@ -498,6 +500,7 @@ abstract public class Record implements Option {
 		return getFieldValue(config.getLabelFieldName());
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void print(boolean printLabel) {
 		if(printLabel) {
 			System.out.println("Config: " + getConfigName());
@@ -516,6 +519,161 @@ abstract public class Record implements Option {
 			}
 		}
 		System.out.println(buf.toString());
+		
+		// print records from recordRelationshipMap
+		Set<Entry<String, Record>> recordSet = recordRelationshipMap.entrySet();
+		for(Entry<String, Record> e : recordSet) {
+			Record rec = e.getValue();
+			if(rec != null) {
+				rec.print(printLabel);
+			}
+		}
+		
+		// print records from listRelationshipMap
+		Set<Entry<String, ArrayList<? extends Record>>> listSet = listRelationshipMap.entrySet();
+		for(Entry<String, ArrayList<? extends Record>> e : listSet) {
+			ArrayList<? extends Record> list = e.getValue();
+			for(Record rec : list) {
+				rec.print(printLabel);
+			}
+		}
+		
+		// print records from mapRelationshipMap
+		Set<Entry<String, HashMap<String, ? extends Record>>> mapSet = mapRelationshipMap.entrySet();
+		for(Entry<String, HashMap<String, ? extends Record>> e : mapSet) {
+			HashMap<String, Record> map = (HashMap<String, Record>)e.getValue();
+			Set<Entry<String, Record>> set = map.entrySet();
+			for(Entry<String, Record> e2 : set) {
+				Record rec = e2.getValue();
+				if(rec != null) {
+					rec.print(printLabel);
+				}
+			}
+		}
+	}
+	
+	protected void appendJSONArray(StringBuilder result, String listName, ArrayList<? extends Record> list, String indent, boolean readable, String TAB, String NL) {
+		int index = listName.lastIndexOf(RecordConfig.CONFIG_NAME_DELIMITER);
+		if(index != -1) {
+			listName = listName.substring(index+RecordConfig.CONFIG_NAME_DELIMITER.length());
+		}
+		
+		result.append(indent);
+		result.append("\"");
+		result.append(listName);
+		result.append("\": [");
+		
+		boolean isFirst = true;
+		for(Record rec : list) {
+			if(!isFirst) {
+				result.append(",");
+			}
+			result.append(NL);
+			result.append(rec.generateJSON(indent + TAB, readable));
+			isFirst = false;
+		}
+		
+		result.append(NL);
+		result.append(indent);
+		result.append("]");
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected StringBuilder generateJSON(String indent, boolean readable) {
+		StringBuilder result = new StringBuilder();
+		
+		String TAB = "\t";
+		String NL = "\n";
+		if(!readable) {
+			TAB = "";
+			NL = "";
+		}
+		
+		String indent2 = indent + TAB;
+		
+		result.append(indent);
+		result.append("{");
+		
+		boolean isFirst = true;
+		for(Field f : getFields()) {
+			if(!isFirst) {
+				result.append(",");
+			}
+			result.append(NL);
+			
+			result.append(indent2);
+			result.append("\"");
+			result.append(f.getFieldName());
+			result.append("\": ");
+			result.append("\"");
+			result.append(f.getFieldValue());
+			result.append("\"");
+			isFirst = false;
+		}
+		
+		// append records from recordRelationshipMap
+		Set<Entry<String, Record>> recordSet = recordRelationshipMap.entrySet();
+		for(Entry<String, Record> e : recordSet) {
+			Record rec = e.getValue();
+			if(rec != null) {
+				if(!isFirst) {
+					result.append(",");
+				}
+				result.append(NL);
+				
+				result.append(indent2);
+				result.append("\"");
+				result.append(e.getKey());
+				result.append("\":");
+				result.append(rec.generateJSON(indent + TAB, readable));
+				isFirst = false;
+			}
+		}
+		
+		// append records from listRelationshipMap
+		Set<Entry<String, ArrayList<? extends Record>>> listSet = listRelationshipMap.entrySet();
+		for(Entry<String, ArrayList<? extends Record>> e : listSet) {
+			if(!isFirst) {
+				result.append(",");
+			}
+			result.append(NL);
+			
+			appendJSONArray(result, e.getKey(), e.getValue(), indent2, readable, TAB, NL);
+			isFirst = false;
+		}
+		
+		// append records from mapRelationshipMap
+		Set<Entry<String, HashMap<String, ? extends Record>>> mapSet = mapRelationshipMap.entrySet();
+		for(Entry<String, HashMap<String, ? extends Record>> e : mapSet) {
+			ArrayList<Record> list = new ArrayList<Record>();
+			HashMap<String, Record> map = (HashMap<String, Record>)e.getValue();
+			Set<Entry<String, Record>> set = map.entrySet();
+			for(Entry<String, Record> e2 : set) {
+				Record rec = e2.getValue();
+				if(rec != null) {
+					list.add(rec);
+				}
+			}
+			if(!Util.nullOrEmptyList(list)) {
+				if(!isFirst) {
+					result.append(",");
+				}
+				result.append(NL);
+				
+				appendJSONArray(result, e.getKey(), list, indent2, readable, TAB, NL);
+				isFirst = false;
+			}
+		}
+		
+		result.append(NL);
+		result.append(indent);
+		result.append("}");
+		
+		return result;
+	}
+
+	public StringBuilder generateJSON(boolean readable) {
+		return generateJSON("", readable);
 	}
 	
 	public boolean equals(Object obj) {
