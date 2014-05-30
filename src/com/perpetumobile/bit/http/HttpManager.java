@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.webkit.CookieSyncManager;
 
-import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.TaskCallback;
 import com.perpetumobile.bit.util.ThreadPoolManager;
@@ -174,7 +173,7 @@ public class HttpManager {
 		task.setHttpRequest(httpRequest);
 		try {
 			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+				ThreadPoolManager.getInstance().run(ThreadPoolManager.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
 			} else {
 				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
 			}
@@ -203,7 +202,7 @@ public class HttpManager {
 		task.setCallback(callback);
 		try {
 			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+				ThreadPoolManager.getInstance().run(ThreadPoolManager.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
 			} else {
 				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
 			}	

@@ -2,7 +2,6 @@ package com.perpetumobile.bit.orm.db;
 
 import java.util.ArrayList;
 
-import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.Task;
 import com.perpetumobile.bit.util.TaskCallback;
@@ -146,7 +145,7 @@ public class DBStatementManager {
 	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
 		try {
 			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+				ThreadPoolManager.getInstance().run(ThreadPoolManager.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
 			} else {
 				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
 			}

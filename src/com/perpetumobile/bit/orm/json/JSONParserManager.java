@@ -9,7 +9,6 @@ import java.io.StringReader;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.json.simple.parser.JSONParser;
 
-import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.http.HttpManager;
 import com.perpetumobile.bit.http.HttpRequest;
 import com.perpetumobile.bit.orm.record.StatementLog;
@@ -142,7 +141,7 @@ public class JSONParserManager {
 	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
 		try {
 			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+				ThreadPoolManager.getInstance().run(ThreadPoolManager.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
 			} else {
 				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
 			}

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import com.perpetumobile.bit.android.DataSingleton;
 import com.perpetumobile.bit.android.util.FileUtil;
 import com.perpetumobile.bit.orm.record.RecordScriptData;
 import com.perpetumobile.bit.orm.record.StatementLoggerImpl;
@@ -133,7 +132,7 @@ public class DBScriptManager {
 	protected void runTask(Task task, String threadPoolManagerConfigName, boolean isSync) {
 		try {
 			if(Util.nullOrEmptyString(threadPoolManagerConfigName)) {
-				ThreadPoolManager.getInstance().run(DataSingleton.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
+				ThreadPoolManager.getInstance().run(ThreadPoolManager.BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME, task);
 			} else {
 				ThreadPoolManager.getInstance().run(threadPoolManagerConfigName, task);
 			}

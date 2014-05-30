@@ -15,8 +15,6 @@ public class DataSingleton {
 	
 	static private Logger logger = new Logger(DataSingleton.class);
 	
-	static final public String BIT_SERVICE_THREAD_POOL_MANAGER_CONFIG_NAME = "BitService";
-	
 	static final public String QUERY_KEY = "QUERY";
 	
 	protected Context appContext;
