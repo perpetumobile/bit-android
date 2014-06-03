@@ -15,8 +15,8 @@ icon varchar,\
 open_text varchar,\
 close_text varchar
 
-JSONDrawer.items.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItem
-JSONDrawer.items.Record.Fields: id varchar,\
+JSONDrawer|items.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItem
+JSONDrawer|items.Record.Fields: id varchar,\
 title varchar,\
 layout varchar,\
 activity varchar,\
@@ -24,8 +24,8 @@ activity_extra varchar,\
 webview_url varchar,\
 is_selectable int
 
-JSONDrawer.items.fields.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItemField
-JSONDrawer.items.fields.Record.Fields: id varchar,\
+JSONDrawer|items|fields.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItemField
+JSONDrawer|items|fields.Record.Fields: id varchar,\
 type varchar,\
 value varchar
 

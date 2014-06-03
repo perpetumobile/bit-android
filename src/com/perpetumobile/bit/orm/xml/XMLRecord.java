@@ -84,23 +84,33 @@ public class XMLRecord extends Record {
 		}
 	}
 	
-	public void getXMLRecords(String configNamePrefix, String elementName, ArrayList<XMLRecord> result) {
-		StringBuffer buf = new StringBuffer(configNamePrefix);
-		buf.append(XMLRecordConfig.CONFIG_NAME_DELIMITER);
-		buf.append(elementName);
-		getXMLRecords(buf.toString(), result);
+	public void getXMLRecords(ArrayList<XMLRecord> result, boolean isRecursive, String... configNameArray) {
+		StringBuilder buf = new StringBuilder();
+		boolean isFirst = true;
+		for(String s : configNameArray) {
+			if(!isFirst) {
+				buf.append(getConfigNameDelimiter());
+			}
+			buf.append(s);
+			isFirst = false;
+		}
+		getXMLRecords(result, isRecursive, buf.toString());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void getXMLRecords(String configName, ArrayList<XMLRecord> result) {
+	protected void getXMLRecords(ArrayList<XMLRecord> result, boolean isRecursive, String configName) {
 		if(configName.startsWith(getConfigName())) {
-			int index = configName.indexOf(XMLRecordConfig.CONFIG_NAME_DELIMITER, getConfigName().length()+1);
+			int index = configName.indexOf(getConfigNameDelimiter(), getConfigName().length()+1);
 			if(index != -1) {
 				String key = configName.substring(0, index);
 				ArrayList<XMLRecord> list = (ArrayList<XMLRecord>)listRelationshipMap.get(key);
 				if(list != null) {
-					for(XMLRecord rec : list) {
-						rec.getXMLRecords(configName, result);
+					if(isRecursive) {
+						for(XMLRecord rec : list) {
+							rec.getXMLRecords(result, isRecursive, configName);
+						}
+					} else {
+						result.addAll(list);
 					}
 				}
 			} else {

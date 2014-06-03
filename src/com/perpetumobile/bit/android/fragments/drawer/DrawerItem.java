@@ -73,7 +73,7 @@ public class DrawerItem extends JSONRecord {
 	@SuppressWarnings("unchecked")
 	public ArrayList<DrawerItemField> getItemFields() {
 		ArrayList<? extends JSONRecord> list = new ArrayList<DrawerItemField>();
-		getJSONRecords("JSONDrawer", "items.fields", (ArrayList<JSONRecord>)list);
+		getJSONRecords((ArrayList<JSONRecord>)list, false, "JSONDrawer", "items", "fields");
     	if(!Util.nullOrEmptyList(list)) {
     		return (ArrayList<DrawerItemField>)list; 
     	}	

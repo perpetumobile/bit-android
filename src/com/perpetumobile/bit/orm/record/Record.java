@@ -51,6 +51,10 @@ abstract public class Record implements Option {
 		return (config != null ? config.getConfigName() : null);
 	}
 	
+	public String getConfigNameDelimiter() {
+		return (config != null ? config.getConfigNameDelimiter() : RecordConfig.CONFIG_NAME_DELIMITER_DEFAULT);
+	}
+	
 	public String getConnectionConfigName() {
 		return (config != null ? config.getConnectionConfigName() : null);
 	}
@@ -553,9 +557,9 @@ abstract public class Record implements Option {
 	}
 	
 	protected void appendJSONArray(StringBuilder result, String listName, ArrayList<? extends Record> list, String indent, boolean readable, String TAB, String NL) {
-		int index = listName.lastIndexOf(RecordConfig.CONFIG_NAME_DELIMITER);
+		int index = listName.lastIndexOf(getConfigNameDelimiter());
 		if(index != -1) {
-			listName = listName.substring(index+RecordConfig.CONFIG_NAME_DELIMITER.length());
+			listName = listName.substring(index+getConfigNameDelimiter().length());
 		}
 		
 		result.append(indent);
@@ -605,9 +609,7 @@ abstract public class Record implements Option {
 			result.append("\"");
 			result.append(f.getFieldName());
 			result.append("\": ");
-			result.append("\"");
-			result.append(f.getFieldValue());
-			result.append("\"");
+			result.append(f.getJSONFieldValue());
 			isFirst = false;
 		}
 		
@@ -621,10 +623,16 @@ abstract public class Record implements Option {
 				}
 				result.append(NL);
 				
+				String key = e.getKey();
+				int index = key.lastIndexOf(getConfigNameDelimiter());
+				if(index != -1) {
+					key = key.substring(index+getConfigNameDelimiter().length());
+				}	
 				result.append(indent2);
 				result.append("\"");
-				result.append(e.getKey());
+				result.append(key);
 				result.append("\":");
+				result.append(NL);
 				result.append(rec.generateJSON(indent + TAB, readable));
 				isFirst = false;
 			}
