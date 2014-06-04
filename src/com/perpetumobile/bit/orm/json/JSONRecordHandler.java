@@ -91,9 +91,17 @@ public class JSONRecordHandler implements ContentHandler {
 	}
 
 	public boolean startObject() throws ParseException, IOException {
+		boolean isNewComplexObject = true;
 		if(isArray) {
-			createJSONRecord();
-		} else if(!Util.nullOrEmptyString(nextKey)) {
+			if(jsonRecord == null) {
+				// need to start jsonRecord for this array
+				createJSONRecord();
+				// this is not new complex object but an object that belongs to this array
+				isNewComplexObject = false;
+			}
+		} 
+
+		if(isNewComplexObject && !Util.nullOrEmptyString(nextKey)) {
 			JSONRecordHandler handler = new JSONRecordHandler(nextKey, this);
 			handler.createJSONRecord();
 			handler.handle(nextKey);
@@ -107,6 +115,8 @@ public class JSONRecordHandler implements ContentHandler {
 			// parent parse is already waiting
 			// parser.parse(in, parent, true);
 			parent.aggregate(jsonRecord, isArray);
+			// clear jsonRecord in case we are processing an array and this handler will be used
+			jsonRecord = null;
 			if(!isArray) {
 				return false;
 			}
