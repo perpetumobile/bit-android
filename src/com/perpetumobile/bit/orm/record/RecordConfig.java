@@ -18,7 +18,7 @@ import com.perpetumobile.bit.util.Util;
  */
 abstract public class RecordConfig {
 	
-	public static final String CONFIG_NAME_DELIMITER_CONFIG_KEY = ".Record.ConfigNameDelimiter";
+	public static final String CONFIG_NAME_DELIMITER_CONFIG_KEY = "Record.ConfigNameDelimiter";
 	public static final String CONFIG_NAME_DELIMITER_DEFAULT = "|";
 	
 	public static final String CLASS_CONFIG_KEY = ".Record.Class";
@@ -56,7 +56,8 @@ abstract public class RecordConfig {
 	protected void init(String configName, Class<? extends Record> defaultRecordClass, VelocityContext vc)
 	throws ClassNotFoundException {
 		this.configName = configName;
-		configNameDelimiter = Config.getInstance().getProperty(configName+CONFIG_NAME_DELIMITER_CONFIG_KEY, CONFIG_NAME_DELIMITER_DEFAULT);
+		// Using a global configNameDelimiter configuration since configName based configuration would add lots of confusion
+		configNameDelimiter = Config.getInstance().getProperty(CONFIG_NAME_DELIMITER_CONFIG_KEY, CONFIG_NAME_DELIMITER_DEFAULT);
 		connectionConfigName = Config.getInstance().getProperty(configName+CONNECTION_CONFIG_KEY_CONFIG_KEY, null);
 		
 		String className = Config.getInstance().getProperty(configName+CLASS_CONFIG_KEY, null);
