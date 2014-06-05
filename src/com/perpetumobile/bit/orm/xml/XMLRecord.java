@@ -84,7 +84,9 @@ public class XMLRecord extends Record {
 		}
 	}
 	
-	public void getXMLRecords(ArrayList<XMLRecord> result, boolean isRecursive, String... configNameArray) {
+	public ArrayList<XMLRecord> getXMLRecords(String... configNameArray) {
+		ArrayList<XMLRecord> result = new ArrayList<XMLRecord>(); 
+		
 		StringBuilder buf = new StringBuilder();
 		boolean isFirst = true;
 		for(String s : configNameArray) {
@@ -94,26 +96,28 @@ public class XMLRecord extends Record {
 			buf.append(s);
 			isFirst = false;
 		}
-		getXMLRecords(result, isRecursive, buf.toString());
+		getXMLRecords(result, buf.toString());
+		
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected void getXMLRecords(ArrayList<XMLRecord> result, boolean isRecursive, String configName) {
+	protected void getXMLRecords(ArrayList<XMLRecord> result, String configName) {
 		if(configName.startsWith(getConfigName())) {
 			int index = configName.indexOf(getConfigNameDelimiter(), getConfigName().length()+1);
 			if(index != -1) {
+				// need to walk down relationship maps
 				String key = configName.substring(0, index);
+				
+				// add records from listRelationshipMap
 				ArrayList<XMLRecord> list = (ArrayList<XMLRecord>)listRelationshipMap.get(key);
 				if(list != null) {
-					if(isRecursive) {
-						for(XMLRecord rec : list) {
-							rec.getXMLRecords(result, isRecursive, configName);
-						}
-					} else {
-						result.addAll(list);
+					for(XMLRecord rec : list) {
+						rec.getXMLRecords(result, configName);
 					}
 				}
 			} else {
+				// add records from listRelationshipMap
 				ArrayList<XMLRecord> list = (ArrayList<XMLRecord>)listRelationshipMap.get(configName);
 				if(list != null) {
 					result.addAll(list);

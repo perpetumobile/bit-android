@@ -71,7 +71,9 @@ public class JSONRecord extends Record {
 		}
 	}
 	
-	public void getJSONRecords(ArrayList<JSONRecord> result, boolean isRecursive, String... configNameArray) {
+	public ArrayList<JSONRecord> getJSONRecords(String... configNameArray) {
+		ArrayList<JSONRecord> result = new ArrayList<JSONRecord>();
+		
 		StringBuilder buf = new StringBuilder();
 		boolean isFirst = true;
 		for(String s : configNameArray) {
@@ -81,36 +83,31 @@ public class JSONRecord extends Record {
 			buf.append(s);
 			isFirst = false;
 		}
-		getJSONRecords(result, isRecursive, buf.toString());
+		getJSONRecords(result, buf.toString());
+		
+		return result;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
-	protected void getJSONRecords(ArrayList<JSONRecord> result, boolean isRecursive, String configName) {
+	protected void getJSONRecords(ArrayList<JSONRecord> result, String configName) {
 		if(configName.startsWith(getConfigName())) {
 			int index = configName.indexOf(getConfigNameDelimiter(), getConfigName().length()+1);
 			if(index != -1) {
+				// need to walk down relationship maps
 				String key = configName.substring(0, index);
 				
 				// add record from recordRelationshipMap
 				JSONRecord rec = (JSONRecord)recordRelationshipMap.get(key);
 				if(rec != null) {
-					if(isRecursive) {
-						rec.getJSONRecords(result, isRecursive, configName);
-					} else {
-						result.add(rec);
-					}
+					rec.getJSONRecords(result, configName);
 				}
 				
-				// add records from listRelationshipMap			
+				// add records from listRelationshipMap
 				ArrayList<JSONRecord> list = (ArrayList<JSONRecord>)listRelationshipMap.get(key);
 				if(list != null) {
-					if(isRecursive) {
-						for(JSONRecord r : list) {
-							r.getJSONRecords(result, isRecursive, configName);
-						}
-					} else {
-						result.addAll(list);
+					for(JSONRecord r : list) {
+						r.getJSONRecords(result, configName);
 					}
 				}
 			} else {
