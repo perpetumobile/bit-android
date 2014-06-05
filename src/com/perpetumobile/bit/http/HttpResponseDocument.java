@@ -14,10 +14,11 @@ public class HttpResponseDocument {
 	protected String sourceUrl = null;
 	protected String destinationUrl = null;
 	protected int statusCode = -1;
-	protected Map<String, List<String>> headerFields = null; 
+	protected Map<String, List<String>> headerFields = null;
+	protected String contentType = null;
+	protected long contentLenght = -1;
 	protected String pageSource = null;
 	protected Bitmap bitmap = null;
-	protected long contentLenght = -1;
 	
 	public HttpResponseDocument(String url) {
 		sourceUrl = url;
@@ -76,7 +77,29 @@ public class HttpResponseDocument {
 	public void setHeaderFields(Map<String, List<String>> headerFields) {
 		this.headerFields = headerFields;
 	}
+	
+	public String getContentType() {
+		return contentType;
+	}
 
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * @return the contentLenght
+	 */
+	public long getContentLenght() {
+		return contentLenght;
+	}
+
+	/**
+	 * @param contentLenght the contentLenght to set
+	 */
+	public void setContentLenght(long contentLenght) {
+		this.contentLenght = contentLenght;
+	}
+	
 	/**
 	 * @return Returns the pageSource.
 	 */
@@ -99,17 +122,4 @@ public class HttpResponseDocument {
 		this.bitmap = bitmap;
 	}
 
-	/**
-	 * @return the contentLenght
-	 */
-	public long getContentLenght() {
-		return contentLenght;
-	}
-
-	/**
-	 * @param contentLenght the contentLenght to set
-	 */
-	public void setContentLenght(long contentLenght) {
-		this.contentLenght = contentLenght;
-	}
 }

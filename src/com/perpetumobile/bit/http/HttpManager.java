@@ -38,6 +38,7 @@ public class HttpManager {
 	protected void readResponse(HttpURLConnection c, HttpResponseDocument result) throws IOException {	
 		int code = c.getResponseCode();
 		result.setStatusCode(code);
+		result.setContentType(c.getContentType());
 		result.setContentLenght(c.getContentLength());
 		result.setHeaderFields(c.getHeaderFields());
 		
@@ -70,6 +71,7 @@ public class HttpManager {
 			readResponse(c, result);
 		} else {
 			result.setStatusCode(code);
+			result.setContentType(c.getContentType());
 			result.setContentLenght(c.getContentLength());
 			result.setHeaderFields(c.getHeaderFields());
 			
@@ -116,8 +118,9 @@ public class HttpManager {
 			c.setRequestMethod("POST");
 			// write content
 			if(!Util.nullOrEmptyString(httpRequest.getContent())) {
-				c.setDoInput(true);
+				c.setDoOutput(true);
 				c.setChunkedStreamingMode(0);
+				c.setRequestProperty("content-type", httpRequest.getContentType());
 				BufferedOutputStream out = new BufferedOutputStream(c.getOutputStream());
 				out.write(httpRequest.getContent().getBytes());
 				out.close();
