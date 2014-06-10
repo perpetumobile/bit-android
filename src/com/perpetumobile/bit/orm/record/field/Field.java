@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import org.json.simple.JSONObject;
+
 import com.perpetumobile.bit.orm.record.exception.FieldUnsupportedOperationException;
 import com.perpetumobile.bit.util.Util;
 
@@ -100,10 +102,14 @@ abstract public class Field {
 	
 	public String getJSONFieldValue() {
 		StringBuilder buf = new StringBuilder();
-		buf.append("\"");
-		// TODO: perform json escaping		
-		buf.append(getFieldValue());
-		buf.append("\"");
+		String value = getFieldValue();
+		if(value != null) {
+			buf.append("\"");
+			buf.append(JSONObject.escape(getFieldValue()));
+			buf.append("\"");
+		} else {
+			buf.append("null");
+		}	
 		return buf.toString();
 	}
 	
