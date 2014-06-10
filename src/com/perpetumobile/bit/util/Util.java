@@ -11,9 +11,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -574,6 +574,19 @@ final public class Util {
 			return str;
 		}
 		return "";
+	}
+	
+	static public String decodeUrl(String url, String enc) {
+		String result = "";
+		if (url != null) {
+			try {
+				result = URLDecoder.decode(url, enc);
+			} catch (UnsupportedEncodingException e) {
+				logger.error("UnsupportedEncodingException at Util.decodeUrl", e);
+				result = url;
+			}
+		}
+		return result;
 	}
 	
 	static public String encodeUrl(String url, String enc) {
