@@ -10,6 +10,7 @@ Database.User:
 Database.Password:
 Database.Url: jdbc:sqldroid:
 Database.Database:
+Database.SQL.LastInsertId: SELECT LAST_INSERT_ROWID()
 
 # DB Pool for schema db 
 Schema.Database.Database: schema

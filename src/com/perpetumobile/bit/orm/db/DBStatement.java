@@ -416,7 +416,7 @@ public class DBStatement<T extends DBRecord> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public T[] streamDBRecord(DBConnection dbConnection, ResultSet rs, T nextRecord)
+	protected T[] streamDBRecord(DBConnection dbConnection, ResultSet rs, T nextRecord)
 	throws SQLException, Exception {
 		DBRecord[] result = new DBRecord[2]; 
 		result[0] = nextRecord;
@@ -550,7 +550,7 @@ public class DBStatement<T extends DBRecord> {
 		int result = 0;
 		Statement stmt = null;
 		ResultSet rs = null;
-		String strSQL = "SELECT LAST_INSERT_ROWID()";
+		String strSQL = dbConnection.getLastInsertIdSQL();
 		int sqlLogIndex = startSQL(strSQL);
 		try {
 			stmt = dbConnection.getConnection().createStatement();
