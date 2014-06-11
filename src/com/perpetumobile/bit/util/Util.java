@@ -380,6 +380,16 @@ final public class Util {
 	}
 	
 	/**
+	 * convert a boolean to a ByteBuffer
+	 */
+	static public ByteBuffer toByteBuffer(boolean value) {
+		if(value) {
+			return toByteBuffer(1, true);
+		}
+		return toByteBuffer(0, true);
+	}
+	
+	/**
 	 * convert an int to a ByteBuffer
 	 */
 	static public ByteBuffer toByteBuffer(int value, boolean variableLen) {
