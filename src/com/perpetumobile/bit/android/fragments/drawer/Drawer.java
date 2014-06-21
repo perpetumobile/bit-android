@@ -35,7 +35,7 @@ public class Drawer extends JSONRecord {
 	
 	@SuppressWarnings("unchecked")
 	public ArrayList<DrawerItem> getDrawerItems() {
-		ArrayList<? extends JSONRecord> list = getJSONRecords("JSONDrawer", "items");;
+		ArrayList<? extends JSONRecord> list = getJSONRecords("JSONDrawer", "items");
     	if(!Util.nullOrEmptyList(list)) {
     		return (ArrayList<DrawerItem>)list; 
     	}	
