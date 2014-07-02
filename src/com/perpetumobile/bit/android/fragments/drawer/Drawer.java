@@ -9,6 +9,7 @@ import com.perpetumobile.bit.orm.json.JSONRecord;
 import com.perpetumobile.bit.util.Util;
 
 public class Drawer extends JSONRecord {
+	private static final long serialVersionUID = 1L;
 	
 	public Drawer() {
 	}

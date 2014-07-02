@@ -14,6 +14,8 @@ import com.perpetumobile.bit.util.Util;
 
 
 public class DrawerItem extends JSONRecord {
+	private static final long serialVersionUID = 1L;
+	
 	static private Logger logger = new Logger(DrawerItem.class);
 	
 	public DrawerItem() {

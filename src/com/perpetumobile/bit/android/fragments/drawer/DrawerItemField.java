@@ -37,6 +37,7 @@ enum DrawerItemFieldType {
 }
 
 public class DrawerItemField extends JSONRecord {
+	private static final long serialVersionUID = 1L;
 	
 	public DrawerItemField() {
 	}
