@@ -352,6 +352,37 @@ abstract public class Record implements Option, Serializable {
 		return getRelationshipRecord(configName, keyField, null, null);
 	}
 	
+	public void unSetField(String fieldName) {
+		Field field = getField(fieldName);
+		if(field != null) {
+			field.unSet();
+		} else if(doThrowFieldNotConfiguredException()) {
+			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
+		}
+	}
+	
+	public boolean isFieldSet(String fieldName) {
+		Field field = getField(fieldName);
+		if(field != null) {
+			return field.isSet();
+		}
+		if(doThrowFieldNotConfiguredException()) {
+			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
+		}
+		return false;
+	}
+	
+	public boolean isFieldSet(String fieldName, String nameSpace) {
+		Field field = getField(fieldName);
+		if(field != null) {
+			return field.isSet(nameSpace);
+		}
+		if(doThrowFieldNotConfiguredException()) {
+			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
+		}
+		return false;
+	}
+	
 	public String getSQLFieldValue(String fieldName) {
 		Field field = getField(fieldName);
 		if(field != null) {
@@ -383,6 +414,17 @@ abstract public class Record implements Option, Serializable {
 			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
 		}
 		return null;
+	}
+	
+	public boolean getBooleanFieldValue(String fieldName) {
+		Field field = getField(fieldName);
+		if(field != null) {
+			return field.getBooleanFieldValue();
+		}
+		if(doThrowFieldNotConfiguredException()) {
+			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
+		}
+		return false;
 	}
 	
 	public int getIntFieldValue(String fieldName) {
@@ -464,6 +506,15 @@ abstract public class Record implements Option, Serializable {
 		Field field = getField(fieldName);
 		if(field != null) {
 			field.setByteBufferFieldValue(fieldValue);
+		} else if(doThrowFieldNotConfiguredException()) {
+			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
+		}
+	}
+	
+	public void setBooleanFieldValue(String fieldName, boolean fieldValue) {
+		Field field = getField(fieldName);
+		if(field != null) {
+			field.setBooleanFieldValue(fieldValue);
 		} else if(doThrowFieldNotConfiguredException()) {
 			throw new FieldNotConfiguredException("Record Config Name: " + getConfigName() + "; Field Name: " + fieldName);
 		}
@@ -627,17 +678,19 @@ abstract public class Record implements Option, Serializable {
 		
 		boolean isFirst = true;
 		for(Field f : getFields()) {
-			if(!isFirst) {
-				result.append(",");
+			if(f.isSet()) {
+				if(!isFirst) {
+					result.append(",");
+				}
+				result.append(NL);
+				
+				result.append(indent2);
+				result.append("\"");
+				result.append(f.getFieldName());
+				result.append("\":");
+				result.append(f.getJSONFieldValue());
+				isFirst = false;
 			}
-			result.append(NL);
-			
-			result.append(indent2);
-			result.append("\"");
-			result.append(f.getFieldName());
-			result.append("\": ");
-			result.append(f.getJSONFieldValue());
-			isFirst = false;
 		}
 		
 		// append records from recordRelationshipMap

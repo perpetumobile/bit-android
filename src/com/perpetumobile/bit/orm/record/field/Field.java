@@ -75,6 +75,10 @@ abstract public class Field implements Serializable {
 	
 	abstract public int setPreparedStatementParameter(PreparedStatement stmt, int index) throws SQLException;
 	
+	public void unSet() {
+		isSet = false;
+	}
+	
 	public boolean isSet() {
 		return isSet;
 	}

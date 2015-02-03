@@ -28,7 +28,10 @@ public class DBConnection extends RecordConnection<Connection> {
 	final static public String DB_LOGIN_TIMEOUT_KEY = "Database.LoginTimeout";
 	
 	final static public String DB_URL_KEY = "Database.Url";
+	final static public String DB_SCHEMA_KEY = "Database.Schema";
 	final static public String DB_DATABASE_KEY = "Database.Database";
+	
+	final static public String DB_TRANSACTION_ENABLED_KEY = "Database.Transaction.Enabled";
 	
 	final static public String DB_SQL_LAST_INSERT_ID_KEY = "Database.SQL.LastInsertId";
 	
@@ -43,7 +46,8 @@ public class DBConnection extends RecordConnection<Connection> {
 	private int loginTimeout = 30;
 	
 	protected String url = null;
-	protected String database = null;
+	protected String schema = null;
+	protected boolean isTransactionEnabled = true;
 	
 	protected String lastInsertIdSQL = null;
 	
@@ -56,7 +60,8 @@ public class DBConnection extends RecordConnection<Connection> {
 		maxRetries = Config.getInstance().getIntClassProperty(configName, DB_RETRIES_KEY, DB_RETRIES_DEFAULT);
 		loginTimeout = Config.getInstance().getIntClassProperty( configName, DB_LOGIN_TIMEOUT_KEY, DB_LOGIN_TIMEOUT_DEFAULT);
 		url = Config.getInstance().getClassProperty(configName, DB_URL_KEY, "");
-		database = Config.getInstance().getClassProperty(configName, DB_DATABASE_KEY, "");
+		schema = Config.getInstance().getClassProperty(configName, DB_SCHEMA_KEY, Config.getInstance().getClassProperty(configName, DB_DATABASE_KEY, ""));
+		isTransactionEnabled = Config.getInstance().getBooleanClassProperty(configName, DB_TRANSACTION_ENABLED_KEY, true);
 		lastInsertIdSQL = Config.getInstance().getClassProperty(configName, DB_SQL_LAST_INSERT_ID_KEY, DB_SQL_LAST_INSERT_ID_DEFAULT);
 	}
 	
@@ -64,12 +69,12 @@ public class DBConnection extends RecordConnection<Connection> {
 		if(connection == null) {
 			Context context = DataSingleton.getInstance().getAppContext();
 			// make sure that database exists
-			SQLiteDatabase db = context.openOrCreateDatabase(database, Context.MODE_PRIVATE, null);
+			SQLiteDatabase db = context.openOrCreateDatabase(schema, Context.MODE_PRIVATE, null);
 			if(db != null) { 
 				// close native connection to avoid connection leak
 				db.close();
 				// now open jdbc connection
-				File f = context.getDatabasePath(database);
+				File f = context.getDatabasePath(schema);
 				connection = connect(url+f.getAbsolutePath());
 			}
 		}
@@ -142,11 +147,61 @@ public class DBConnection extends RecordConnection<Connection> {
 		return url;
 	}
 	
+	@Deprecated
 	public String getDatabaseName(){
-		return database;
+		return schema;
+	}
+	
+	public String getSchema() throws SQLException {
+		String result = schema;
+		if(connection != null) {
+			result = connection.getCatalog();
+		} 
+		return (result != null ? result : "");
+	}
+	
+	public void setSchema(String schema) throws SQLException {
+		this.schema = schema;
+		if(connection != null) {
+			connection.setCatalog(schema);
+		}
 	}
 
 	public String getLastInsertIdSQL() {
 		return lastInsertIdSQL;
+	}
+	
+	public int startTransaction() throws SQLException {
+		if(isTransactionEnabled) {
+			Statement stmt = connection.createStatement();
+			stmt.setEscapeProcessing(false);
+			return stmt.executeUpdate("START TRANSACTION");
+		}
+		return 0;
+	}
+	
+	public int commit() throws SQLException {
+		if(isTransactionEnabled) {
+			Statement stmt = connection.createStatement();
+			stmt.setEscapeProcessing(false);
+			return stmt.executeUpdate("COMMIT");
+		}
+		return 0;	
+	}
+	
+	public int rollback() {
+		if(isTransactionEnabled) {
+			int result = -1;
+			Statement stmt;
+			try {
+				stmt = connection.createStatement();
+				stmt.setEscapeProcessing(false);
+				result = stmt.executeUpdate("ROLLBACK");
+			} catch (SQLException e) {
+				logger.error("Exception at DBConnection.rollback", e);
+			}
+			return result;
+		}
+		return 0;
 	}
 }
