@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.net.CookieHandler;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -86,6 +90,19 @@ public class HttpManager {
 		}
 	}
 
+	protected void setHeaderFields(HttpURLConnection c, Map<String, List<String>> headerFields) {
+		if(headerFields != null) {
+			Set<Entry<String, List<String>>> set = headerFields.entrySet();
+			for(Entry<String, List<String>> e : set) {
+				String name = e.getKey();
+				List<String> values = e.getValue();
+				for(String v : values) {
+					c.setRequestProperty(name, v);
+				}
+			}
+		}
+	}
+	
 	protected HttpResponseDocument getImpl(HttpRequest httpRequest) {
 		HttpResponseDocument result = new HttpResponseDocument(httpRequest.getUrl());
 		HttpURLConnection c = null;
@@ -93,6 +110,7 @@ public class HttpManager {
 			URL u = new URL(httpRequest.getUrl());
 			c = (HttpURLConnection) u.openConnection();
 			httpRequest.prepareConnection(c);
+			setHeaderFields(c, httpRequest.getHeaderFields());
 			
 			// read response
 			if(httpRequest.method == HttpMethod.GET_IMAGE) { 
@@ -115,12 +133,15 @@ public class HttpManager {
 			URL u = new URL(httpRequest.getUrl());
 			c = (HttpURLConnection) u.openConnection();
 			httpRequest.prepareConnection(c);
+			setHeaderFields(c, httpRequest.getHeaderFields());
 			c.setRequestMethod("POST");
+			
 			// write content
 			if(!Util.nullOrEmptyString(httpRequest.getContent())) {
 				c.setDoOutput(true);
 				c.setChunkedStreamingMode(0);
 				c.setRequestProperty("content-type", httpRequest.getContentType());
+				c.setRequestProperty("content-length", Integer.toString(httpRequest.getContent().length()));
 				BufferedOutputStream out = new BufferedOutputStream(c.getOutputStream());
 				out.write(httpRequest.getContent().getBytes());
 				out.close();
