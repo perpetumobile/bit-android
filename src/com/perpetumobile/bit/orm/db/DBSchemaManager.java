@@ -36,7 +36,7 @@ import com.perpetumobile.bit.util.Util;
  *
  * @author Zoran Dukic
  */
-public class DBSchemaManager implements ConfigSubscriber {
+public class DBSchemaManager implements ConfigSubscriber, Runnable {
 	static private DBSchemaManager instance = new DBSchemaManager();
 	static public DBSchemaManager getInstance() { return instance; }
 	
@@ -58,19 +58,24 @@ public class DBSchemaManager implements ConfigSubscriber {
 	private DBSchemaManager() {
 		Config.getInstance().subscribe(this);
 	}
+	
+	@Override
+	public void run() {
+		try {
+			if(isSchemaFromServerEnabled()) {
+				requestSchemaFromServer();
+			} else {
+				upgrade();
+			}
+		} catch (Exception e) {
+			logger.error("DBSchemaManager.run exception", e);
+		}
+	}
 
 	@Override
 	public void onConfigReset() {
 		if(isAutoEnabled()) {
-			try {
-				if(isSchemaFromServerEnabled()) {
-					requestSchemaFromServer();
-				} else {
-					upgrade();
-				}
-			} catch (Exception e) {
-				logger.error("DBSchemaManager.configReset exception", e);
-			}
+			run();
 		}
 	}
 
@@ -148,7 +153,7 @@ public class DBSchemaManager implements ConfigSubscriber {
 		return Config.getInstance().getBooleanProperty(DB_SCHEMA_MANAGER_SERVER_ENABLE_KEY, false);
 	}
 	
-	protected void requestSchemaFromServer() {
+	public void requestSchemaFromServer() {
 		batchHttpRequest.request(Config.getInstance().getProperty(DB_SCHEMA_MANAGER_SERVER_URLS_KEY, null));
 	}
 }
