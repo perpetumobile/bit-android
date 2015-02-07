@@ -13,13 +13,17 @@ import com.perpetumobile.bit.util.Util;
 /**
  * DBSchemaManager supports database schema management.
  * 
- * <p>Schema db configuration needs to be specified. For example:
+ * <p>Schema db configuration needs to be specified as follows:
  * <br>Schema.Database.Database: schema
  * 
- * <p>Schema db record configuration needs to be specified. For example:
+ * where database name should match your database schema name.
+ * 
+ * <p>Schema db record configuration needs to be specified as follows:
  * <br>Schema.DBRecord.Table.Name: schema
- * <br>Schema.Record.Fields: schema_id auto,\
- * <br>version varchar(64)
+ * <br>Schema.Record.Fields: schema_id int,\
+ * <br>schema_version varchar(64)
+ * 
+ * where table name should match table name in your database schema.
  * 
  * <p>DBSchemaManager.Version.Required configuration settings should be used to define required schema version.
  * <p>DBSchemaManager.Version.UpgradeFrom.[version] configuration setting should be used to specify comma delimited 
@@ -40,6 +44,8 @@ public class DBSchemaManager implements ConfigSubscriber {
 	
 	static final public String SCHEMA_DB_CONFIG_NAME = "Schema";
 	static final public String SCHEMA_DB_RECORD_CONFIG_NAME = "Schema";
+	static final public String SCHEMA_DB_ID_FIELD_NAME = "schema_id";
+	static final public String SCHEMA_DB_VERSION_FIELD_NAME = "schema_version";
 	
 	static final public String AUTO_ENABLE_CONFIG_KEY = "DBSchemaManager.Auto.Enable";
 	static final public boolean AUTO_ENABLE_DEFAULT = true;
@@ -80,11 +86,11 @@ public class DBSchemaManager implements ConfigSubscriber {
 		String result = "0";
 		try {
 			DBStatement<? extends DBRecord> stmt = new DBStatement<DBRecord>(SCHEMA_DB_RECORD_CONFIG_NAME);
-			stmt.addOrderByClause("schema_id desc");
+			stmt.addOrderByClause(SCHEMA_DB_ID_FIELD_NAME + " desc");
 			ArrayList<? extends DBRecord> list = DBStatementManager.getInstance().selectImpl(SCHEMA_DB_CONFIG_NAME, stmt);
 			if(!Util.nullOrEmptyList(list)) {
 				DBRecord rec = list.get(0);
-				result = rec.getFieldValue("version");
+				result = rec.getFieldValue(SCHEMA_DB_VERSION_FIELD_NAME);
 			}
 		} catch (Exception e) {
 			logger.error("DBSchemaManager.getCurrentVersion exception", e);

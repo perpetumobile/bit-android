@@ -56,6 +56,7 @@ public class BitActivity extends Activity {
 		DataSingleton.getInstance().setAssetManager(getAssets());
 		DataSingleton.getInstance().setAppContext(getApplicationContext());
 		CookieSyncManager.createInstance(getApplicationContext());
+		Config.getInstance();
 		setContentView(layoutId);
 		overridePendingTransition(android.R.anim.fade_in , android.R.anim.fade_out);
 	}

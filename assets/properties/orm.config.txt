@@ -1,7 +1,7 @@
 ## Schema DBRecord configuration
 Schema.DBRecord.Table.Name: schema
 Schema.Record.Fields: schema_id auto,\
-version varchar(64)
+schema_version varchar(64)
 
 
 XMLRecord.ParseAll.Enable: true
