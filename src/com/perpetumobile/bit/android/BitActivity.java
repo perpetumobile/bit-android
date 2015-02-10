@@ -18,6 +18,7 @@ import android.webkit.CookieSyncManager;
 public class BitActivity extends Activity {
 
 	static final public String ACTIVITY_EXTRA = "com.perpetumobile.bit.android.ACTIVITY_EXTRA";
+	static final public String ACTIVITY_EXTRA_BUNDLE = "com.perpetumobile.bit.android.ACTIVITY_EXTRA_BUNDLE";
 	static final public String ACTIVITY_URL = "com.perpetumobile.bit.android.ACTIVITY_URL";
 	
 	static final public String DRAWER_POSITION = "com.perpetumobile.bit.android.DRAWER_POSITION";

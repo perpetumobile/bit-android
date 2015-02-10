@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 
 import com.perpetumobile.bit.android.BitActivity;
@@ -45,6 +46,11 @@ public class DrawerItem extends JSONRecord {
 		return getFieldValue("activity_extra");
 	}
 	
+	public Bundle getActivityExtraBundle() {
+		DrawerItemActivityExtraBundle r = (DrawerItemActivityExtraBundle)getFirstLevelJSONRecord("activity_extra_bundle");
+		return (r != null ? r.getBundle() : null);
+	}
+	
 	public String getWebViewUrl() {
 		return getFieldValue("webview_url");
 	}
@@ -61,6 +67,10 @@ public class DrawerItem extends JSONRecord {
 				Class<? extends Activity> activityClass = (Class<? extends Activity>)Class.forName(activity.getApplicationContext().getPackageName() + activityClassName);
 				Intent intent = new Intent(activity, activityClass);
 				intent.putExtra(BitActivity.ACTIVITY_EXTRA, getActivityExtra());
+				Bundle bundle = getActivityExtraBundle();
+				if(bundle != null) {
+					intent.putExtra(BitActivity.ACTIVITY_EXTRA_BUNDLE, bundle);
+				}
 				intent.putExtra(BitActivity.ACTIVITY_URL, getWebViewUrl());
 				intent.putExtra(BitActivity.DRAWER_POSITION, position);
 				activity.startActivity(intent);

@@ -24,6 +24,8 @@ activity_extra varchar,\
 webview_url varchar,\
 is_selectable int
 
+JSONDrawer|items|activity_extra_bundle.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItemActivityExtraBundle
+
 JSONDrawer|items|fields.Record.Class: com.perpetumobile.bit.android.fragments.drawer.DrawerItemField
 JSONDrawer|items|fields.Record.Fields: id varchar,\
 type varchar,\
