@@ -92,8 +92,11 @@ public class DrawerFragment extends BitFragment {
 	static final public String FILE_NAME_CONFIG_KEY = "DrawerFragment.FileName";
 	static final public String FILE_NAME_DEFAULT = "drawer.json";
 	
-	static final public String LAYOUT_ID_CONFIG_KEY = "DrawerFragment.Layout.Id";
-	static final public String LAYOUT_ID_DEFAULT = "@layout/drawer_fragment";
+	static final public String PARENT_LAYOUT_ID_CONFIG_KEY = "DrawerFragment.Parent.Layout.Id";
+	static final public String PARENT_LAYOUT_ID_DEFAULT = "@id/drawer_layout";
+	
+	static final public String LAYOUT_CONFIG_KEY = "DrawerFragment.Layout";
+	static final public String LAYOUT_DEFAULT = "@layout/drawer_fragment";
 	
 	static final public String LIST_VIEW_ID_CONFIG_KEY = "DrawerFragment.ListView.Id";
 	static final public String LIST_VIEW_ID_DEFAULT = "@id/drawer_list_view";
@@ -228,7 +231,7 @@ public class DrawerFragment extends BitFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {	
 		Activity activity = getActivity();
 		
-		String layoutId = Config.getInstance().getClassProperty(configName, LAYOUT_ID_CONFIG_KEY, LAYOUT_ID_DEFAULT);
+		String layoutId = Config.getInstance().getClassProperty(configName, LAYOUT_CONFIG_KEY, LAYOUT_DEFAULT);
 		layout = inflater.inflate(RUtil.getResourceId(layoutId), container, false);
         
 		String listViewId = Config.getInstance().getClassProperty(configName, LIST_VIEW_ID_CONFIG_KEY, LIST_VIEW_ID_DEFAULT);
@@ -251,7 +254,8 @@ public class DrawerFragment extends BitFragment {
 		
 		Activity activity = getActivity();
 		
-		parentLayout = (DrawerLayout)activity.findViewById(RUtil.getResourceId("id", "drawer_layout"));
+		String parentLayoutId = Config.getInstance().getClassProperty(configName, PARENT_LAYOUT_ID_CONFIG_KEY, PARENT_LAYOUT_ID_DEFAULT);
+		parentLayout = (DrawerLayout)activity.findViewById(RUtil.getResourceId(parentLayoutId));
 		// set a custom shadow that overlays the main content when the drawer opens
 		parentLayout.setDrawerShadow(drawer.getShadowId(), GravityCompat.START);
 

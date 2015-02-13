@@ -1,5 +1,6 @@
 ## DrawerFragment default config
-DrawerFragment.Layout.Id: @layout/drawer_fragment
+DrawerFragment.Parent.Layout.Id: @id/drawer_layout
+DrawerFragment.Layout: @layout/drawer_fragment
 DrawerFragment.ListView.Id: @id/drawer_list_view
 DrawerFragment.FileName: drawer.json
 
