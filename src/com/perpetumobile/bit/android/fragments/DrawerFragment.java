@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.AttributeSet;
@@ -214,9 +214,10 @@ public class DrawerFragment extends BitFragment {
 					drawerListView.removeHeaderView(task.view);
 					break;
 				case ADD_FOOTER_VIEW:
-					drawerListView.removeFooterView(task.view);
+					drawerListView.addFooterView(task.view, task.data, task.isSelectable);
 					break;
 				case REMOVE_FOOTER_VIEW:
+					drawerListView.removeFooterView(task.view);
 					break;
 				}
 			}
@@ -259,16 +260,18 @@ public class DrawerFragment extends BitFragment {
 		drawerToggle = new ActionBarDrawerToggle(
 				activity,				/* host Activity */
 				parentLayout,			/* DrawerLayout object */
-				drawer.getIconId(),			/* nav drawer image to replace 'Up' caret */
+				// drawer.getIconId(),			/* nav drawer image to replace 'Up' caret */
 				drawer.getOpenTextId(),	/* "open drawer" description for accessibility */
 				drawer.getCloseTextId()	/* "close drawer" description for accessibility */
 				) {
-
+			
+			@Override
 			public void onDrawerClosed(View view) {
 				getActivity().getActionBar().setTitle(title);
 				getActivity().invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
 			}
 
+			@Override
 			public void onDrawerOpened(View drawerView) {
 				getActivity().getActionBar().setTitle(drawerTitle);
 				getActivity().invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
