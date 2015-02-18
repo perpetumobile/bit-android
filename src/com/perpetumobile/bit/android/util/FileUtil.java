@@ -1,5 +1,6 @@
 package com.perpetumobile.bit.android.util;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -45,6 +47,39 @@ final public class FileUtil {
 	static public Reader getAssetFileReader(String filePath) 
 	throws IOException {
 		return new InputStreamReader(getAssetFileInputStream(filePath));
+	}
+	
+	/**
+	 * Get asset file length in bytes.
+	 */
+	static public int getAssetFileLength(String filePath) 
+	throws IOException {
+		int result = 0;
+		BufferedInputStream in = new BufferedInputStream(getAssetFileInputStream(filePath));
+		byte[] buf = new byte[1024];
+		int len = 0;
+		while ((len = in.read(buf)) != -1) {
+			result +=len;
+		}
+		in.close();
+		return result;
+	}
+	
+	/**
+	 * Read binary asset file.
+	 */
+	static public ByteBuffer readBinaryAssetFile(String filePath) 
+	throws IOException {
+		ByteBuffer result = ByteBuffer.allocate(getAssetFileLength(filePath));
+		BufferedInputStream in = new BufferedInputStream(getAssetFileInputStream(filePath));
+		byte[] buf = new byte[1024];
+		int len = 0;
+		while ((len = in.read(buf)) != -1) {
+			result.put(buf, 0, len);
+		}
+		in.close();
+		result.flip();
+		return result;
 	}
 	
 	/**
@@ -150,6 +185,16 @@ final public class FileUtil {
 		return new FileReader(getFile(filePath));
 	}
 	
+	/**
+	 * Read binary file. If file is in the Asset directory the filePath should be prefixed with "asset:".
+	 */
+	static public ByteBuffer readBinaryFile(String filePath) 
+	throws IOException {
+		if(isAssetFile(filePath)) {
+			return readBinaryAssetFile(filePath.substring(ASSET_DIRECTORY_PROTOCOL.length()));			
+		}
+		return Util.readBinaryFile(getFile(filePath));
+	}
 	
 	/**
 	 * Read file. If file is in the Asset directory the filePath should be prefixed with "asset:".

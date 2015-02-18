@@ -161,6 +161,35 @@ public class HttpManager {
 		return result;
 	}
 	
+	protected HttpResponseDocument multiPartPostImpl(HttpRequest httpRequest) {
+		HttpResponseDocument result = new HttpResponseDocument(httpRequest.getUrl());
+		HttpURLConnection c = null;
+		try {
+			URL u = new URL(httpRequest.getUrl());
+			c = (HttpURLConnection) u.openConnection();
+			httpRequest.prepareConnection(c);
+			MultiPartEntity.prepareConnection(c);
+			
+			setHeaderFields(c, httpRequest.getHeaderFields());
+			
+			BufferedOutputStream out = new BufferedOutputStream(c.getOutputStream());
+			httpRequest.getMultiPartEntity().write(out);
+			out.close();
+			
+			// read response
+			if(httpRequest.method == HttpMethod.MULTI_PART_IMAGE) { 
+				readImageResponse(c, result);
+			} else {
+				readResponse(c, result);
+			}
+		} catch (Exception e) {
+			logger.error("HttpManager.multiPartPostImpl exception", e);
+		} finally {
+			if(c != null) c.disconnect();
+		}
+		return result;
+	}
+	
 	public HttpResponseDocument executeImpl(HttpRequest httpRequest) {
 		HttpResponseDocument result = null;
 		switch(httpRequest.method) {
@@ -170,12 +199,18 @@ public class HttpManager {
 			case POST:
 				result = postImpl(httpRequest);
 				break;
+			case MULTI_PART:
+				result = multiPartPostImpl(httpRequest);
+				break;	
 			case GET_IMAGE:
 				result = getImpl(httpRequest);
 				break;
 			case POST_IMAGE:
 				result = postImpl(httpRequest);
 				break;
+			case MULTI_PART_IMAGE:
+				result = multiPartPostImpl(httpRequest);
+				break;	
 		}
 		return result;
 	}
