@@ -168,12 +168,12 @@ public class HttpManager {
 			URL u = new URL(httpRequest.getUrl());
 			c = (HttpURLConnection) u.openConnection();
 			httpRequest.prepareConnection(c);
-			MultiPartEntity.prepareConnection(c);
+			MultipartEntity.prepareConnection(c);
 			
 			setHeaderFields(c, httpRequest.getHeaderFields());
 			
 			BufferedOutputStream out = new BufferedOutputStream(c.getOutputStream());
-			httpRequest.getMultiPartEntity().write(out);
+			httpRequest.getMultipartEntity().write(out);
 			out.close();
 			
 			// read response

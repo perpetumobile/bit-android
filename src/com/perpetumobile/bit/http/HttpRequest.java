@@ -23,7 +23,7 @@ public class HttpRequest {
 	protected String mimeType = MIME_TYPE_DEFAULT;
 	protected String charset = CHARSET_DEFAULT;
 	
-	protected MultiPartEntity multiPartEntity = null;
+	protected MultipartEntity multipartEntity = null;
 
 	protected Map<String, List<String>> headerFields = null;
 	
@@ -102,12 +102,12 @@ public class HttpRequest {
 		return result.toString();
 	}
 	
-	public MultiPartEntity getMultiPartEntity() {
-		return multiPartEntity;
+	public MultipartEntity getMultipartEntity() {
+		return multipartEntity;
 	}
 
-	public void setMultiPartEntity(MultiPartEntity multiPartEntity) {
-		this.multiPartEntity = multiPartEntity;
+	public void setMultipartEntity(MultipartEntity multipartEntity) {
+		this.multipartEntity = multipartEntity;
 	}
 
 	public Map<String, List<String>> getHeaderFields() {

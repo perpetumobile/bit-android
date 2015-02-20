@@ -11,23 +11,23 @@ import com.perpetumobile.bit.util.Logger;
 import com.perpetumobile.bit.util.Util;
 
 class FormPart {
-	protected String paramName = null;
+	protected String partName = null;
 	protected String value = null;
 	
-	public FormPart(String paramName, String value) {
-		this.paramName = paramName;
+	public FormPart(String partName, String value) {
+		this.partName = partName;
 		this.value = value;
 	}
 }
 
 class DataPart {
-	protected String paramName = null;
+	protected String partName = null;
 	protected String contentType = null;
 	protected String fileName = null;
 	protected byte[] data = null;
 
-	public DataPart(String paramName, String contentType, String fileName, byte[] data) {
-		this.paramName = paramName;
+	public DataPart(String partName, String contentType, String fileName, byte[] data) {
+		this.partName = partName;
 		this.contentType = contentType;
 		this.fileName = fileName;
 		this.data = data;
@@ -35,17 +35,17 @@ class DataPart {
 	
 	public void writeContentType(OutputStream os) throws IOException {
 		if(Util.nullOrEmptyString(contentType)) {
-			os.write(MultiPartEntity.contentTypeApplicationOctetStream);
+			os.write(MultipartEntity.contentTypeApplicationOctetStream);
 		} else {
-			os.write(MultiPartEntity.contentTypeKey);
+			os.write(MultipartEntity.contentTypeKey);
 			os.write(contentType.getBytes());
 		}
 	}
 }
 
-public class MultiPartEntity {
+public class MultipartEntity {
 
-	static private Logger logger = new Logger(MultiPartEntity.class);
+	static private Logger logger = new Logger(MultipartEntity.class);
 
 	static final public byte[] crlf = "\r\n".getBytes();
 	static final public byte[] quote = "\"".getBytes();
@@ -69,20 +69,20 @@ public class MultiPartEntity {
 	protected ArrayList<FormPart> formParts = new ArrayList<FormPart>();
 	protected ArrayList<DataPart> dataParts = new ArrayList<DataPart>();
 	
-	public MultiPartEntity() {
+	public MultipartEntity() {
 	}
 	
-	public void addFormPart(String paramName, String value) {
-		formParts.add(new FormPart(paramName, value));
+	public void addFormPart(String partName, String value) {
+		formParts.add(new FormPart(partName, value));
 	}
 	
-	public void addFilePart(String paramName, String contentType, File file) throws IOException {
+	public void addFilePart(String partName, String contentType, File file) throws IOException {
 		ByteBuffer data = Util.readBinaryFile(file);
-		dataParts.add(new DataPart(paramName, contentType, file.getName(), data.array()));
+		dataParts.add(new DataPart(partName, contentType, file.getName(), data.array()));
 	}
 	
-	public void addDataPart(String paramName, String contentType, String fileName, byte[] data) {
-		dataParts.add(new DataPart(paramName, contentType, fileName, data));
+	public void addDataPart(String partName, String contentType, String fileName, byte[] data) {
+		dataParts.add(new DataPart(partName, contentType, fileName, data));
 	}
 	
 	static public void prepareConnection(HttpURLConnection c) {
@@ -104,7 +104,7 @@ public class MultiPartEntity {
 		os.write(contentTypeTextPlain);
 		os.write(crlf);
 		os.write(contentDispositionFormData_nameKey);
-		os.write(part.paramName.getBytes());
+		os.write(part.partName.getBytes());
 		os.write(quote);
 		os.write(crlf);
 		os.write(crlf);
@@ -117,7 +117,7 @@ public class MultiPartEntity {
 		os.write(boundary.getBytes());
 		os.write(crlf);
 		os.write(contentDispositionFormData_nameKey);
-		os.write(part.paramName.getBytes());
+		os.write(part.partName.getBytes());
 		os.write(quote);
 		os.write(filenameKey);
 		os.write(part.fileName.getBytes());
