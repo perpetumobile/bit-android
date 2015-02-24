@@ -104,6 +104,10 @@ public class DBSchemaManager implements ConfigSubscriber, Runnable {
 		return result;
 	}
 	
+	synchronized public void rebuild() throws Exception {
+		upgrade(getRequiredVersion(), "0");
+	}
+	
 	synchronized public void upgrade() throws Exception {
 		upgrade(getRequiredVersion(), getCurrentVersion());
 	}
