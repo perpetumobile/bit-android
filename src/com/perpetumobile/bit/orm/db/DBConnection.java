@@ -174,7 +174,8 @@ public class DBConnection extends RecordConnection<Connection> {
 	public int startTransaction() throws SQLException {
 		if(isTransactionEnabled) {
 			Statement stmt = connection.createStatement();
-			stmt.setEscapeProcessing(false);
+			// setEscapeProcessing not implemented in sqldroid
+			// stmt.setEscapeProcessing(false);
 			return stmt.executeUpdate("START TRANSACTION");
 		}
 		return 0;
@@ -183,7 +184,8 @@ public class DBConnection extends RecordConnection<Connection> {
 	public int commit() throws SQLException {
 		if(isTransactionEnabled) {
 			Statement stmt = connection.createStatement();
-			stmt.setEscapeProcessing(false);
+			// setEscapeProcessing not implemented in sqldroid
+			// stmt.setEscapeProcessing(false);
 			return stmt.executeUpdate("COMMIT");
 		}
 		return 0;	
@@ -195,7 +197,8 @@ public class DBConnection extends RecordConnection<Connection> {
 			Statement stmt;
 			try {
 				stmt = connection.createStatement();
-				stmt.setEscapeProcessing(false);
+				// setEscapeProcessing not implemented in sqldroid
+				// stmt.setEscapeProcessing(false);
 				result = stmt.executeUpdate("ROLLBACK");
 			} catch (SQLException e) {
 				logger.error("Exception at DBConnection.rollback", e);

@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.perpetumobile.bit.util.Util;
+import android.database.DatabaseUtils;
 
 
 /**
@@ -26,15 +26,7 @@ public class DBUtil {
 		if (sql == null) {
 			return SQL_STRING_NULL;
 		}
-
-		sql = Util.replaceAll(sql, "\\", "\\\\");
-		sql = Util.replaceAll(sql, "'", "''");
-
-		StringBuffer buf = new StringBuffer();
-		buf.append('\'');
-		buf.append(sql);
-		buf.append('\'');
-		return buf.toString();
+		return DatabaseUtils.sqlEscapeString(sql);
 	}
 	
 	public static String encodeSQLString(String sql, int limit) {
